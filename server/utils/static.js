@@ -5,7 +5,7 @@ import path from 'node:path';
 const source=path.resolve(fileURLToPath(new URL('../../web/',import.meta.url)));
 const dist=path.resolve(fileURLToPath(new URL('../../dist/',import.meta.url)));
 const base=process.env.SERVE_DIST==='1'&&existsSync(dist)?dist:source;
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.json':'application/json; charset=utf-8','.txt':'text/plain; charset=utf-8'};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.json':'application/json; charset=utf-8','.txt':'text/plain; charset=utf-8','.ogg':'audio/ogg'};
 export function hasThree(){return existsSync(path.join(base,'vendor','three.module.js'));}
 export async function serveStatic(request,response) {
   if(!['GET','HEAD'].includes(request.method))return false;
