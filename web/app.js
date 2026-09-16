@@ -67,6 +67,7 @@ function createCinematicOverlay() {
       eyebrow.textContent = textEyebrow;
       title.textContent = textTitle;
       body.textContent = textBody;
+      body.hidden = !textBody;
       root.dataset.tone = tone;
       root.classList.remove("is-closing");
       root.classList.add("is-active");
@@ -100,11 +101,10 @@ function startAdmissions() {
     site = { submission_enabled: true },
     savingFailed = false,
     skipMotion = false;
-  const stored = readPreferences(),
-    media = matchMedia("(prefers-reduced-motion: reduce)");
+  const stored = readPreferences();
   let preferences = {
     quality: stored.quality || (innerWidth < 680 ? "low" : "balanced"),
-    reduced: stored.reduced ?? media.matches,
+    reduced: stored.reduced ?? false,
     flat: stored.flat ?? false,
   };
   const cinematic = createCinematicOverlay();
@@ -112,34 +112,34 @@ function startAdmissions() {
     landingProgress = 0;
   const branchData = [
     [
+      "承流学会",
       "想象",
-      "Cascade Bearers",
-      "让新的设想成为可能。在未知面前，为问题寻找未曾走过的路径。",
+      "推崇想象力，包含从最有远见的魔法理论家的设想，到各种富含创意的解决问题的奇思妙想。",
       "cascade",
     ],
     [
-      "同伴",
-      "Emerald Boughs",
-      "将学习连向共同体。珍惜同窗，也将学院的知识带给学院之外的人。",
+      "翠枝学社",
+      "情谊",
+      "强调友情、社区意识和与玛甘比校友们的联系；他们还善于与玛甘比之外的人互动，传递学院的信息。",
       "boughs",
     ],
     [
+      "雨幕书会",
       "适应",
-      "Rain-Scribes",
-      "愿意改变，也愿意承认错误。从经历中学习，以新的方式回应世界。",
+      "重视思想和实践上的适应能力，善于从失败中总结教训。",
       "rain",
     ],
     [
+      "岚阳法盟",
       "勇气",
-      "Tempest-Sun Mages",
-      "保护他人，也敢于倾听不同的观点。勇气同样属于思想。",
-      "sun",
+      "强调勇气，不仅是为帮助朋友和学校而行动，更注重思想上的勇气：敢于反对权威，而不是墨守成规。",
+      "courage",
     ],
     [
+      "传智学派",
       "知识",
-      "Uzunjati",
-      "在代代讲述的故事与亲身经历之间，保存并传递来之不易的知识。",
-      "stories",
+      "相信知识不仅存在于世代相传的故事中，也能通过个人实践获得。",
+      "knowledge",
     ],
   ];
   function brand() {
@@ -147,6 +147,13 @@ function startAdmissions() {
   }
   function header() {
     return `<header class="masthead">${brand()}<nav class="top-nav" aria-label="主导航"><button type="button" data-action="branches" class="text-button">学院五支</button><button type="button" data-action="draft" class="text-button draft-nav">我的草稿</button><span class="nav-divider"></span><button type="button" class="icon-button" data-action="sound" aria-label="${audio.enabled ? "关闭音景" : "聆听庭院"}" aria-pressed="${audio.enabled}">${icon(audio.enabled ? "sound" : "mute")}</button><button type="button" class="icon-button" data-action="settings" aria-label="阅读与画面设置">${icon("tune")}</button></nav></header>`;
+  }
+  function syncSoundControl() {
+    const control = $('[data-action="sound"]');
+    if (!control) return;
+    control.innerHTML = icon(audio.enabled ? "sound" : "mute");
+    control.setAttribute("aria-label", audio.enabled ? "关闭音景" : "聆听庭院");
+    control.setAttribute("aria-pressed", String(audio.enabled));
   }
   function footer() {
     return `<footer class="site-footer"><span class="footer-location"><i></i> 纳塔穆博 <span class="footer-slash">/</span> THE RAINCOURT</span><span class="footer-project">万千之力 · 入学档案</span><a href="/admin" class="archive-link">档案室 ${icon("arrow", 15)}</a></footer>`;
@@ -286,7 +293,7 @@ function startAdmissions() {
   function view() {
     switch (machine.phase) {
       case "arrival":
-        return `<main id="main" class="landing-screen"><section class="landing-scroll"><div class="landing-frame"><div class="landing-poster" aria-hidden="true"></div><div class="landing-prompt"><span class="landing-prompt__line"></span><p>向下拖拽</p><small>让庭院从纸页走入眼前</small><i>${icon("arrow", 18)}</i></div><div class="hero-copy landing-copy"><p class="eyebrow"><span class="fine-line"></span> 纳塔穆博 · 雨庭来信</p><h1 tabindex="-1">让你的故事<br><em>在此生根。</em></h1><p class="hero-description">先从一幅静止的来信开始。<br>当你向下拖拽，雨庭会从图像渐渐苏醒，并带你落向凉亭中的学院信匣。</p><div class="hero-actions">${button("赴学院之约", "approach")}<button type="button" class="understated" data-action="direct">直接阅信 ${icon("arrow", 16)}</button></div><p class="journey-note">2D 来信 <span>·</span> 3D 雨庭 <span>·</span> 靠近信匣</p></div><div class="scene-caption landing-caption" aria-hidden="true"><span>庭院里的来信</span><small>THE COURTYARD LETTER</small><i></i></div><div class="hero-edition" aria-hidden="true">I</div><div class="landing-progressmark" aria-hidden="true"><span></span></div></div></section></main>`;
+        return `<main id="main" class="landing-screen"><section class="landing-scroll"><div class="landing-frame"><div class="landing-poster" aria-hidden="true"></div><div class="landing-prompt"><span class="landing-prompt__line"></span><p>向下拖拽</p><small>让庭院从纸页走入眼前</small><i>${icon("arrow", 18)}</i></div><div class="hero-copy landing-copy"><p class="eyebrow"><span class="fine-line"></span> 纳塔穆博 · 雨庭来信</p><h1 tabindex="-1">让你的故事<br><em>在此生根。</em></h1><p class="hero-description">先从一幅静止的来信开始。<br>向下拖拽，沿着雨庭落向凉亭中的学院信匣。</p><div class="hero-actions">${button("赴学院之约", "approach")}<button type="button" class="understated" data-action="direct">直接阅信 ${icon("arrow", 16)}</button></div></div><div class="scene-caption landing-caption" aria-hidden="true"><span>庭院里的来信</span><small>THE COURTYARD LETTER</small><i></i></div><div class="hero-edition" aria-hidden="true">I</div><div class="landing-progressmark" aria-hidden="true"><span></span></div></div></section></main>`;
       case "chest":
         return `<main id="main" class="stage-screen"><div class="stage-copy"><button class="back-link" type="button" data-action="home">${icon("back", 17)} 返回庭院</button><p class="eyebrow">第一笺 <span>/</span> AN INVITATION</p><h1 tabindex="-1">一封为你<br>留存的来信。</h1><p class="stage-description">铜扣仍带着雨后的凉意。<br>说出交予你的启封词，让来信重见天光。</p><form id="unlock-form"><label class="field-label" for="spell">启封词</label><div class="spell-field"><input id="spell" name="spell" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="120" placeholder="在此写下启封词" required aria-describedby="unlock-error"><span>${icon("leaf")}</span></div><p id="unlock-error" class="form-error" role="alert"></p><button class="primary" type="submit" ${busy ? "disabled" : ""}>${busy ? "正在启封" : "开启来信"}<span>${icon("arrow")}</span></button></form></div><div class="object-note" aria-hidden="true">I <span>学院信匣</span></div></main>`;
       case "letter":
@@ -659,7 +666,6 @@ function startAdmissions() {
         await goCinematic("chest", {
           eyebrow: "RAINCOURT",
           title: "穿过雨庭，走近学院信匣。",
-          body: "镜头会从庭院远景推进到书桌前，让仪式感完整展开。",
           tone: "mist",
         });
         $("#spell")?.focus({ preventScroll: true });
@@ -758,10 +764,7 @@ function startAdmissions() {
       case "sound":
         try {
           await audio.toggle();
-          const b = $('[data-action="sound"]');
-          b.innerHTML = icon(audio.enabled ? "sound" : "mute");
-          b.setAttribute("aria-label", audio.enabled ? "关闭音景" : "聆听庭院");
-          b.setAttribute("aria-pressed", String(audio.enabled));
+          syncSoundControl();
         } catch (e) {
           toast(e.message);
         }
@@ -770,7 +773,7 @@ function startAdmissions() {
   }
   function showBranches() {
     openDialog(
-      `<p class="eyebrow">FIVE BRANCHES · ONE COMMUNITY</p><h2>五种求知的方式，<br>同一座学院。</h2><p class="dialog-intro">学派强调不同的价值，而知识在彼此交流中生长。</p><div class="branches">${branchData.map(([value, name, text, glyph], i) => `<article><span class="branch-number">0${i + 1}</span><div><h3>${value}<small>${name}</small></h3><p>${text}</p></div><span class="branch-glyph ${glyph}" aria-hidden="true">${icon(i === 3 ? "sun" : i === 4 ? "book" : "leaf", 28)}</span></article>`).join("")}</div>`,
+      `<p class="eyebrow">FIVE BRANCHES · ONE COMMUNITY</p><h2>五种求知的方式，<br>同一座学院。</h2><p class="dialog-intro">学派强调不同的价值，而知识在彼此交流中生长。</p><div class="branches">${branchData.map(([name, value, text, glyph], i) => `<article><span class="branch-number">0${i + 1}</span><div><h3>${name}<small>${value}</small></h3><p>${text}</p></div><span class="branch-glyph ${glyph}" aria-hidden="true">${icon(glyph, 28)}</span></article>`).join("")}</div>`,
     );
   }
   function showDraft() {
@@ -903,10 +906,26 @@ function startAdmissions() {
     })
     .catch(() => {});
   loadScene();
+  const activateAudio = async (event) => {
+    if (event.target?.closest?.('[data-action="sound"]')) return;
+    document.removeEventListener("pointerdown", activateAudio, true);
+    document.removeEventListener("keydown", activateAudio, true);
+    try {
+      await audio.enable();
+      syncSoundControl();
+    } catch {}
+  };
+  document.addEventListener("pointerdown", activateAudio, {
+    capture: true,
+    passive: true,
+  });
+  document.addEventListener("keydown", activateAudio, true);
   document.addEventListener("visibilitychange", () =>
     document.hidden ? audio.pause() : audio.resume(),
   );
   window.addEventListener("pagehide", () => {
+    document.removeEventListener("pointerdown", activateAudio, true);
+    document.removeEventListener("keydown", activateAudio, true);
     save();
     audio.dispose();
     scene?.dispose();
@@ -915,12 +934,6 @@ function startAdmissions() {
   });
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) location.reload();
-  });
-  media.addEventListener("change", (event) => {
-    if (stored.reduced === undefined) {
-      preferences.reduced = event.matches;
-      scene?.configure(preferences);
-    }
   });
   window.__RAINCOURT__ = {
     get phase() {
