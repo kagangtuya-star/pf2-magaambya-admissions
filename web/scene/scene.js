@@ -116,7 +116,11 @@ export class RaincourtScene {
     const s=ease(t);pose=blendPose(a,b,s);if(b.lift>a.lift)pose.lift=T.MathUtils.lerp(a.lift,b.lift,smooth01((t-.15)/.85));
    }
   }
-  return pose;
+  const enter=smooth01(t/.12);
+  pose=blendPose(a,pose,enter);
+  const settleStart=motion.profile.name==='unseal'?.72:.84;
+  const settle=smooth01((t-settleStart)/(1-settleStart));
+  return blendPose(pose,b,settle);
  }
  go(name,{instant=false,profile=null}={}){
   if(!views[name]||this.disposed)return Promise.resolve();this.resolveMotion?.();const fromPhase=this.phase;const chosen=instant||this.reduced?{name:'instant',duration:0}:profile?{name:profile,duration:profileFor(fromPhase,name,false).duration}:profileFor(fromPhase,name,this.reduced);this.phase=name;
@@ -126,7 +130,7 @@ export class RaincourtScene {
   if(this.disposed||this.hidden)return;this.raf=0;const dt=Math.min(.05,(now-(this.last||now))/1000);this.last=now;const reading=['writing','review'].includes(this.phase);
   if(!this.reduced&&!reading)this.time+=dt;
   const wasMoving=Boolean(this.motion);let settled=!this.motion;
-  if(this.motion){const t=this.motion.duration===0?1:Math.min(1,(now-this.motion.at)/this.motion.duration);this.applyPose(this.sampleMotion(clamp01(t)));if(t===1){this.applyPose(this.motion.to);this.motion=null;settled=true;this.resolveMotion?.();this.resolveMotion=null;}}
+  if(this.motion){const t=this.motion.duration===0?1:Math.min(1,(now-this.motion.at)/this.motion.duration);this.applyPose(this.sampleMotion(clamp01(t)));if(t===1){this.applyPose(this.motion.to);this.parallax.set(0,0);this.motion=null;settled=true;this.resolveMotion?.();this.resolveMotion=null;}}
   else if(!this.reduced&&!reading){
    this.parallax.lerp(this.pointer,.025);
    if(this.phase==='arrival'){
