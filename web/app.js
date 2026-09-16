@@ -40,53 +40,6 @@ function readPreferences() {
     return {};
   }
 }
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-function createCinematicOverlay() {
-  const root = document.createElement("div");
-  root.className = "cinematic-overlay";
-  root.setAttribute("aria-hidden", "true");
-  root.innerHTML =
-    '<div class="cinematic-overlay__wash"></div><div class="cinematic-overlay__veil"></div><div class="cinematic-overlay__panel"><p class="cinematic-overlay__eyebrow"></p><h2 class="cinematic-overlay__title"></h2><p class="cinematic-overlay__body"></p><div class="cinematic-overlay__rule"><span></span></div></div>';
-  document.body.append(root);
-  const eyebrow = root.querySelector(".cinematic-overlay__eyebrow");
-  const title = root.querySelector(".cinematic-overlay__title");
-  const body = root.querySelector(".cinematic-overlay__body");
-  let ticket = 0;
-  return {
-    async play({
-      eyebrow: textEyebrow = "",
-      title: textTitle = "",
-      body: textBody = "",
-      tone = "mist",
-      linger = 1120,
-      exit = 540,
-    } = {}) {
-      const current = ++ticket;
-      eyebrow.textContent = textEyebrow;
-      title.textContent = textTitle;
-      body.textContent = textBody;
-      body.hidden = !textBody;
-      root.dataset.tone = tone;
-      root.classList.remove("is-closing");
-      root.classList.add("is-active");
-      document.body.classList.add("cinematic-active");
-      await wait(linger);
-      if (current !== ticket) return;
-      root.classList.add("is-closing");
-      await wait(exit);
-      if (current !== ticket) return;
-      root.classList.remove("is-active", "is-closing");
-      document.body.classList.remove("cinematic-active");
-    },
-    clear() {
-      ticket++;
-      root.classList.remove("is-active", "is-closing");
-      document.body.classList.remove("cinematic-active");
-    },
-  };
-}
 function startAdmissions() {
   const machine = createMachine(),
     audio = new CourtyardAudio();
@@ -107,7 +60,6 @@ function startAdmissions() {
     reduced: stored.reduced ?? false,
     flat: stored.flat ?? false,
   };
-  const cinematic = createCinematicOverlay();
   let landingController = null,
     landingProgress = 0;
   const branchData = [
@@ -281,8 +233,7 @@ function startAdmissions() {
   }
   function render() {
     const phase = machine.phase;
-    const cinematicOn = document.body.classList.contains("cinematic-active");
-    document.body.className = `phase-${phase} ${sceneFailed || preferences.flat ? "scene-flat" : ""} ${preferences.reduced ? "reduced-motion" : ""} ${cinematicOn ? "cinematic-active" : ""} ${phase === "arrival" ? "landing-home" : ""}`;
+    document.body.className = `phase-${phase} ${sceneFailed || preferences.flat ? "scene-flat" : ""} ${preferences.reduced ? "reduced-motion" : ""} ${phase === "arrival" ? "landing-home" : ""}`;
     $("#app").innerHTML = header() + view() + footer();
     bindCommon();
     bindView();
@@ -370,30 +321,6 @@ function startAdmissions() {
     focusHeading();
     window.scrollTo({ top: 0, behavior: "instant" });
     await scene?.go(phase, { instant: instant || skipMotion });
-  }
-  async function goCinematic(phase, options = {}) {
-    const {
-      instant = false,
-      eyebrow = "",
-      title = "",
-      body = "",
-      tone = "mist",
-      enabled = true,
-    } = options;
-    const canCinematic =
-      enabled &&
-      !preferences.reduced &&
-      !skipMotion &&
-      !preferences.flat &&
-      !sceneFailed &&
-      scene;
-    if (!canCinematic) return go(phase, instant);
-    const overlay = cinematic.play({ eyebrow, title, body, tone });
-    try {
-      return await go(phase, instant);
-    } finally {
-      await overlay;
-    }
   }
   function bindCommon() {
     $$("[data-action]").forEach((el) =>
@@ -498,13 +425,7 @@ function startAdmissions() {
       if (oldVersion && oldVersion !== content.updated_at)
         toast("题笺已更新，请重新核对保留的回答。");
       if (skipMotion) await go("invitation", true);
-      else
-        await goCinematic("letter", {
-          eyebrow: "RAINCOURT RITUAL",
-          title: "铜扣松开，信匣初启。",
-          body: "镜头将越过书桌，与来信一同升起。",
-          tone: "brass",
-        });
+      else await go("letter");
     } catch (error) {
       busy = false;
       if ($("#unlock-error")) $("#unlock-error").textContent = error.message;
@@ -663,11 +584,7 @@ function startAdmissions() {
     switch (name) {
       case "approach":
         skipMotion = false;
-        await goCinematic("chest", {
-          eyebrow: "RAINCOURT",
-          title: "穿过雨庭，走近学院信匣。",
-          tone: "mist",
-        });
+        await go("chest");
         $("#spell")?.focus({ preventScroll: true });
         break;
       case "direct":
@@ -676,7 +593,6 @@ function startAdmissions() {
         $("#spell")?.focus({ preventScroll: true });
         break;
       case "home":
-        cinematic.clear();
         go("arrival");
         break;
       case "unseal":
@@ -684,12 +600,7 @@ function startAdmissions() {
         busy = true;
         $('[data-action="unseal"]').disabled = true;
         audio.chime();
-        await goCinematic("invitation", {
-          eyebrow: "THE LETTER UNFOLDS",
-          title: "封蜡离纸，书页舒展。",
-          body: "镜头会顺着纸页前移，再把视线交还给你。",
-          tone: "paper",
-        });
+        await go("invitation");
         busy = false;
         break;
       case "read-now":
@@ -697,13 +608,7 @@ function startAdmissions() {
         break;
       case "write":
         page = Math.min(draft.page, pageList().length - 1);
-        await goCinematic("writing", {
-          eyebrow: "OPEN THE FOLIO",
-          title: "书页已经铺开。",
-          body: "从仪式过渡到安静阅读，让问卷自然接管视线。",
-          tone: "paper",
-          enabled: machine.phase === "invitation",
-        });
+        await go("writing");
         break;
       case "return-chest":
         save();
@@ -875,7 +780,6 @@ function startAdmissions() {
         },
         onFailure: () => {
           sceneFailed = true;
-          cinematic.clear();
           scene?.dispose();
           scene = null;
           $("#world").classList.remove("is-ready");
@@ -929,7 +833,6 @@ function startAdmissions() {
     save();
     audio.dispose();
     scene?.dispose();
-    cinematic.clear();
     destroyLanding(false);
   });
   window.addEventListener("pageshow", (event) => {
