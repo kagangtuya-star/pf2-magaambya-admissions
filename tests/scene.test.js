@@ -18,3 +18,18 @@ test('Envelope seams face outward and the sealed letter clears the chest during 
   envelope.root.traverse(o=>{if(!o.isMesh)return;const vertices=o.geometry.attributes.position;for(let j=0;j<vertices.count;j++){point.fromBufferAttribute(vertices,j).applyMatrix4(o.matrixWorld);if(point.y<2.87)assert.ok(Math.abs(point.z)<.735&&Math.abs(point.x)<1.385,`Envelope intersects chest wall at lift ${i/100}`);}});
  }
 });
+test('Furniture contacts its supporting surface and planter mouths remain open',{skip:!installed},async()=>{
+ const T=await import('../web/vendor/three.module.js');const {buildChest,buildDesk}=await import('../web/scene/models.js');const {buildCourtyard}=await import('../web/scene/courtyard.js');
+ const material=new T.MeshStandardMaterial({side:T.DoubleSide}),m=Object.fromEntries(['wood','darkWood','stone','paleStone','terracotta','verdigris','brass','oldBrass','lining','leaf','light'].map(key=>[key,material]));
+ const desk=buildDesk(m),chest=buildChest(m),court=buildCourtyard(m,'low');desk.position.y=.3;chest.root.position.y=1.77;desk.updateMatrixWorld(true);chest.root.updateMatrixWorld(true);
+ const bounds=object=>new T.Box3().setFromObject(object),feet=[];desk.traverse(o=>{if(o.name==='desk-foot')feet.push(o);});
+ assert.equal(feet.length,4);for(const foot of feet)assert.ok(Math.abs(bounds(foot).min.y-.2725)<.002,'Desk feet must touch the platform');
+ const tabletop=desk.children.find(o=>o.material===m.lining&&o.geometry?.type==='BoxGeometry'&&o.position.y===1.408);const surface=bounds(tabletop).max.y;
+ chest.root.traverse(o=>{if(o.name==='casket-foot')assert.ok(Math.abs(bounds(o).min.y-surface)<.01,'Casket feet must rest on the desk');});
+ court.root.updateMatrixWorld(true);const pots=court.root.children.filter(o=>o.name==='courtyard-planter');assert.equal(pots.length,2);
+ for(const pot of pots){
+  const ray=new T.Raycaster(new T.Vector3(pot.position.x,2,pot.position.z),new T.Vector3(0,-1,0));
+  assert.equal(ray.intersectObject(pot.getObjectByName('open-planter')).length,0,'The pot must not have a solid lid');
+  const hits=ray.intersectObject(pot.getObjectByName('planter-soil'));assert.ok(hits.length>0);assert.ok(hits[0].point.y<.6,'Soil must sit below the rim');
+ }
+});

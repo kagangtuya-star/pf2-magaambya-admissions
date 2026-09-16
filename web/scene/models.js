@@ -35,7 +35,12 @@ export function buildChest(m){
  for(const x of [-1.29,1.29]){box(root,.14,.89,.015,m.brass,[x,.62,d/2+.013]);box(root,.14,.89,.015,m.brass,[x,.62,-d/2-.013]);for(const y of [.29,.52,.79,.97]){const rivet=mesh(new T.SphereGeometry(.029,8,6),m.oldBrass,root,[x,y,d/2+.03]);rivet.scale.z=.5;}}
  rounded(root,1.7,.52,.026,.07,m.darkWood,[0,.64,d/2+.02]);for(let i=0;i<9;i++){const x=-.71+i*.178;tube(root,[[x-.06,.43,.903],[x+.06,.55,.91],[x-.06,.67,.903],[x+.06,.79,.91]],.009,m.oldBrass,9);}
  const crestAccents={leaf:m.oldBrass,edge:m.brass};const mark=crest(root,m.verdigris,.245,'front',crestAccents);mark.position.set(0,.645,.955);
- for(const x of [-1.32,1.32])for(const z of [-.67,.67])rounded(root,.29,.19,.28,.055,m.darkWood,[x,-.05,z]);
+ for(const x of [-1.32,1.32])for(const z of [-.67,.67])rounded(root,.29,.1,.28,.04,m.darkWood,[x,-.005,z]).name='casket-foot';
+ for(const side of [-1,1]){
+  const handle=new T.Group();handle.name='casket-side-handle';handle.position.set(side*(w/2+.025),.64,0);handle.rotation.y=side*Math.PI/2;root.add(handle);
+  for(const x of [-.27,.27]){rounded(handle,.13,.19,.025,.025,m.oldBrass,[x,0,0]);mesh(new T.SphereGeometry(.025,8,6),m.brass,handle,[x,.045,.023]);}
+  tube(handle,[[-.27,0,.04],[-.25,-.15,.13],[0,-.21,.16],[.25,-.15,.13],[.27,0,.04]],.025,m.oldBrass,16);
+ }
  const lidPivot=new T.Group();lidPivot.name='rear-hinge';lidPivot.position.set(0,top,-d/2);root.add(lidPivot);const lid=new T.Group();lid.position.z=d/2;lidPivot.add(lid);
  rounded(lid,w+.08,.18,d+.07,.05,m.wood,[0,.08,0]);rounded(lid,w-.14,.12,d-.13,.1,m.wood,[0,.19,0]);rounded(lid,w-.4,.06,d-.37,.07,m.darkWood,[0,.27,0]);const topMark=crest(lid,m.verdigris,.48,'top',crestAccents);topMark.position.set(0,.305,0);
  for(const x of [-1.29,1.29]){box(lid,.145,.018,d+.08,m.brass,[x,.19,0]);for(const z of [-.72,-.42,.42,.72])mesh(new T.SphereGeometry(.027,8,6),m.brass,lid,[x,.207,z]);mesh(new T.CylinderGeometry(.074,.074,.24,12),m.brass,root,[x,top,-d/2],[0,0,Math.PI/2]);}
@@ -54,4 +59,18 @@ export function buildEnvelope(m){
  mesh(new T.ExtrudeGeometry(wax,{depth:.03,bevelEnabled:true,bevelSize:.012,bevelThickness:.008,bevelSegments:2,curveSegments:6}),m.wax,seal);mesh(new T.TorusGeometry(.154,.008,6,36),m.wax,seal,[0,0,.042]);const c=crest(seal,m.wax,.135);c.position.z=.051;
  return {root,flap,letter,seal,setOpen(t){const crack=T.MathUtils.smoothstep(t,0,.25);seal.position.z=.132+crack*.27;seal.position.y=-.1-crack*.21;seal.rotation.z=crack*.3;seal.scale.setScalar(1-crack*.14);seal.visible=t<.42;flap.rotation.x=-T.MathUtils.smoothstep(t,.12,.7)*Math.PI*.96;const lift=T.MathUtils.smoothstep(t,.45,1);letter.position.y=lift*.79;letter.position.z=.025+lift*.24;const p=letterGeo.attributes.position;for(let i=0;i<p.count;i++){const x=original[i*3],y=original[i*3+1];p.setZ(i,Math.sin((y/h+.5)*Math.PI)*lift*.085+Math.sin(x/w*Math.PI)*lift*.04);}p.needsUpdate=true;letterGeo.computeVertexNormals();}};
 }
-export function buildDesk(m){const root=new T.Group();root.name='stone-reading-table';rounded(root,4.35,.2,2.7,.12,m.paleStone,[0,1.24,0]);rounded(root,4.06,.095,2.43,.08,m.darkWood,[0,1.355,0]);for(const x of [-1.58,1.58])for(const z of [-.82,.82]){mesh(new T.CylinderGeometry(.12,.23,1.1,8),m.stone,root,[x,.61,z]);mesh(new T.CylinderGeometry(.25,.28,.13,8),m.oldBrass,root,[x,.12,z]);}box(root,3.65,.012,1.92,m.lining,[0,1.408,0]);for(const x of [-1.77,1.77])box(root,.026,.017,1.93,m.oldBrass,[x,1.418,0]);return root;}
+export function buildDesk(m){
+ const root=new T.Group();root.name='stone-reading-table';
+ rounded(root,4.35,.2,2.7,.12,m.paleStone,[0,1.24,0]);rounded(root,4.06,.095,2.43,.08,m.darkWood,[0,1.355,0]);
+ for(const x of [-1.58,1.58])for(const z of [-.82,.82]){
+  mesh(new T.CylinderGeometry(.12,.23,1.1,8),m.stone,root,[x,.61,z]);
+  mesh(new T.CylinderGeometry(.25,.28,.13,8),m.oldBrass,root,[x,.038,z]).name='desk-foot';
+  mesh(new T.CylinderGeometry(.24,.15,.12,8),m.paleStone,root,[x,1.09,z]);
+ }
+ for(const z of [-.82,.82])rounded(root,3.35,.16,.12,.025,m.darkWood,[0,1.08,z]);
+ for(const x of [-1.58,1.58])rounded(root,.12,.16,1.64,.025,m.darkWood,[x,1.08,0]);
+ box(root,3.65,.012,1.92,m.lining,[0,1.408,0]);
+ for(const x of [-1.77,1.77])box(root,.026,.017,1.93,m.oldBrass,[x,1.418,0]);
+ for(const z of [-.952,.952])box(root,3.56,.017,.026,m.oldBrass,[0,1.418,z]);
+ return root;
+}

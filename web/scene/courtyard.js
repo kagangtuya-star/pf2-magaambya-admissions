@@ -4,7 +4,8 @@ import {seeded} from '../lib/state.js';
 
 function lantern(root,m,x,y,z){
  const g=new T.Group();g.position.set(x,y,z);root.add(g);
- tube(g,[[0,.9,0],[0,.5,0],[0,.28,0]],.014,m.oldBrass,5);
+ // Carry the suspension back to the beam instead of ending in open air.
+ tube(g,[[x/.78-x,.98,0],[0,.98,0],[0,.5,0],[0,.28,0]],.014,m.oldBrass,8);
  mesh(new T.CylinderGeometry(.16,.25,.11,8),m.brass,g,[0,.26,0]);
  mesh(new T.CylinderGeometry(.18,.15,.34,8),m.light,g,[0,.02,0]);
  mesh(new T.CylinderGeometry(.23,.12,.08,8),m.oldBrass,g,[0,-.2,0]);
@@ -20,6 +21,11 @@ function roof(parent,m){
  const mat=m.verdigris.clone();mat.side=T.DoubleSide;mesh(geom,mat,parent);
  for(let i=0;i<n;i++){const a=i/n*Math.PI*2+Math.PI/8;tube(parent,rings.map(([rx,rz,y])=>[Math.cos(a)*rx,y+.025,Math.sin(a)*rz]),.022,m.oldBrass,16);}
  for(let ring=0;ring<2;ring++){const [rx,rz,y]=rings[ring];const points=[];for(let i=0;i<=n;i++){const a=i/n*Math.PI*2+Math.PI/8;points.push([Math.cos(a)*rx,y,Math.sin(a)*rz]);}tube(parent,points,.058,m.darkWood,48);}
+ // Straight standing seams follow each roof facet without rounding its corners.
+ for(let band=1;band<5;band++){
+  const t=band/5,rx=T.MathUtils.lerp(4.35,2.6,t),rz=T.MathUtils.lerp(3.15,1.98,t),y=T.MathUtils.lerp(5.43,6.43,t)+.018;
+  for(let i=0;i<n;i++){const a=i/n*Math.PI*2+Math.PI/8,b=(i+1)/n*Math.PI*2+Math.PI/8;tube(parent,[[Math.cos(a)*rx,y,Math.sin(a)*rz],[Math.cos(b)*rx,y,Math.sin(b)*rz]],.012,m.oldBrass,1);}
+ }
  mesh(new T.ConeGeometry(.19,.45,8),m.brass,parent,[0,7.27,0]);
  const edgeMaterial=m.terracotta;
  for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.PI/8,b=(i+1)/8*Math.PI*2+Math.PI/8;
@@ -27,6 +33,18 @@ function roof(parent,m){
  }
 }
 function palmLeafGeometry(){const shape=new T.Shape();shape.moveTo(0,0);shape.bezierCurveTo(-.33,.3,-.43,.72,0,1.3);shape.bezierCurveTo(.36,.82,.24,.22,0,0);const g=new T.ShapeGeometry(shape,5),p=g.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i);p.setZ(i,Math.sin(y*1.8)*.14+Math.abs(p.getX(i))*.23);}g.computeVertexNormals();return g;}
+function planter(parent,m,x){
+ const root=new T.Group();root.name='courtyard-planter';root.position.set(x,0,1);parent.add(root);
+ const profile=[[.29,0],[.34,.035],[.57,.6],[.57,.65],[.51,.65],[.49,.57],[.29,.08]].map(([r,y])=>new T.Vector2(r,y));
+ mesh(new T.LatheGeometry(profile,24),m.terracotta,root).name='open-planter';
+ mesh(new T.CylinderGeometry(.485,.485,.025,24),m.darkWood,root,[0,.54,0]).name='planter-soil';
+ mesh(new T.TorusGeometry(.54,.035,8,24),m.oldBrass,root,[0,.625,0],[Math.PI/2,0,0]);
+ const geometry=palmLeafGeometry();
+ for(let i=0;i<11;i++){
+  const angle=i*Math.PI*2/11,leaf=mesh(geometry,m.leaf,root,[Math.cos(angle)*.12,.55,Math.sin(angle)*.12],[.35+(i%3)*.19,angle,0]);
+  leaf.scale.set(.55,.65+(i%4)*.12,.75);
+ }
+}
 function plantWorld(parent,m,quality){
  const r=seeded(777),count=1550,geom=palmLeafGeometry(),material=m.leaf.clone(),time={value:0};
  const inject=shader=>{shader.uniforms.uWindTime=time;shader.vertexShader='uniform float uWindTime;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat seed = instanceMatrix[3].x * .31 + instanceMatrix[3].z * .18;\ntransformed.x += sin(uWindTime * .65 + seed + position.y * 2.0) * position.y * .065;\ntransformed.z += cos(uWindTime * .43 + seed) * position.y * .04;');};
@@ -65,7 +83,9 @@ export function buildCourtyard(m,quality='balanced'){
  for(const x of [-3.15,3.15])rounded(pergola,.28,.25,4.7,.04,m.darkWood,[x,5,0]);
  for(const x of [-3.15,3.15])for(const z of [-2.2,2.2]){
   tube(pergola,[[x,4.25,z],[x-Math.sign(x)*.45,4.52,z],[x-Math.sign(x)*.82,5,z]],.07,m.darkWood,12);
+  tube(pergola,[[x,4.25,z],[x,4.52,z-Math.sign(z)*.45],[x,5,z-Math.sign(z)*.82]],.07,m.darkWood,12);
  }
+ for(const x of [-3.15,0,3.15])rounded(pergola,.16,.25,5.8,.025,m.darkWood,[x,5.23,0]);
  roof(pergola,m);
  for(const x of [-11,-7,7,11]){
   box(root,3.7,.9,.65,m.terracotta,[x,.35,-11]);box(root,3.8,.08,.72,m.oldBrass,[x,.84,-11]);
@@ -73,7 +93,7 @@ export function buildCourtyard(m,quality='balanced'){
   box(root,3.6,.18,.46,m.paleStone,[x,4.32,-11]);
   for(let j=0;j<5;j++)box(root,.075,.7,.12,m.darkWood,[x-1.2+j*.6,1.3,-11]);
  }
- for(const x of [-5.3,5.3]){mesh(new T.CylinderGeometry(.57,.33,.63,12),m.terracotta,root,[x,.3,1]);mesh(new T.TorusGeometry(.53,.065,8,24),m.oldBrass,root,[x,.63,1],[Math.PI/2,0,0]);}
+ for(const x of [-5.3,5.3])planter(root,m,x);
  const vegetation=plantWorld(root,m,quality);
  return{root,vegetation};
 }
