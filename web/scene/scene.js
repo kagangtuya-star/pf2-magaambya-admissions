@@ -92,7 +92,8 @@ export class RaincourtScene {
  }
  applyPose(pose){
   this.camera.position.copy(pose.eye);this.look.copy(pose.look);this.values.open=pose.open;this.values.lift=pose.lift;this.values.unfold=pose.unfold;
-  this.camera.lookAt(this.look);this.chest.setOpen(this.values.open);this.envelope.root.visible=this.values.lift>.015||this.values.unfold>.01;this.envelope.root.position.set(0,2.04+this.values.lift*1.66,this.values.lift*.38);this.envelope.root.rotation.set(-Math.PI/2*(1-this.values.lift),this.values.lift*.42,-this.values.lift*.045);this.envelope.setOpen(this.values.unfold);
+  const tilt=smooth01((this.values.lift-.65)/.35),present=smooth01((this.values.lift-.9)/.1);
+  this.camera.lookAt(this.look);this.chest.setOpen(this.values.open);this.envelope.root.visible=this.values.lift>.015||this.values.unfold>.01;this.envelope.root.position.set(0,2.04+this.values.lift*1.66,present*.38);this.envelope.root.rotation.set(-Math.PI/2*(1-tilt),present*.42,-present*.045);this.envelope.setOpen(this.values.unfold);
  }
  sampleMotion(t){
   const motion=this.motion,a=motion.from,b=motion.to,arc=Math.sin(t*Math.PI);let pose=blendPose(a,b,t);

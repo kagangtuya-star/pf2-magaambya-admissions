@@ -43,11 +43,13 @@ export function buildChest(m){
  return {root,lid:lidPivot,setOpen(t){lidPivot.rotation.x=-t*1.69;}};
 }
 export function buildEnvelope(m){
- const root=new T.Group();root.name='folded-admissions-letter';const w=2.52,h=1.66;panel(root,[[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]],m.paper).name='paper-back';
+ const root=new T.Group();root.name='folded-admissions-letter';const w=2.52,h=1.6;panel(root,[[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]],m.paper).name='paper-back';
  const letter=new T.Group();root.add(letter);letter.position.z=.025;const letterGeo=new T.PlaneGeometry(w*.9,h*.91,18,24);mesh(letterGeo,m.letter,letter).name='inner-letter';const original=new Float32Array(letterGeo.attributes.position.array);
  const lower=panel(root,[[-w/2,-h/2],[w/2,-h/2],[0,.33]],m.paper);lower.position.z=.061;const left=panel(root,[[-w/2,-h/2],[-w/2,h/2],[.08,-.14]],m.paper);left.position.z=.043;const right=panel(root,[[w/2,-h/2],[-.08,-.14],[w/2,h/2]],m.paper);right.position.z=.045;
- const foldMat=new T.LineBasicMaterial({color:0xa59a7b,transparent:true,opacity:.38});for(const ps of [[[-w/2,-h/2,.082],[0,.33,.082],[w/2,-h/2,.082]],[[-w/2,h/2,.061],[0,-.14,.061],[w/2,h/2,.061]]])root.add(new T.Line(new T.BufferGeometry().setFromPoints(ps.map(p=>new T.Vector3(...p))),foldMat));
+ const foldMat=new T.MeshStandardMaterial({color:0x96876b,roughness:.95});
+ const lowerFold=tube(root,[[-w/2+.014,-h/2+.014,.079],[0,.33,.079],[w/2-.014,-h/2+.014,.079]],.0025,foldMat,2);lowerFold.name='lower-envelope-fold';lowerFold.castShadow=false;
  const flap=new T.Group();flap.name='crease-hinge';flap.position.set(0,h/2,.075);root.add(flap);panel(flap,[[-w/2,0],[0,-1.05],[w/2,0]],m.paper);
+ for(const side of [-1,1]){const seam=tube(flap,[[side*(w/2-.014),-.01,.02],[0,-1.038,.02]],.003,foldMat,1);seam.name='flap-fold';seam.castShadow=false;}
  const seal=new T.Group();seal.name='wax-seal';seal.position.set(0,-.1,.132);root.add(seal);const wax=new T.Shape(),random=seeded(341);for(let i=0;i<=42;i++){const a=i/42*Math.PI*2,r=.21+(random()-.5)*.021;i?wax.lineTo(Math.cos(a)*r,Math.sin(a)*r):wax.moveTo(Math.cos(a)*r,Math.sin(a)*r);}
  mesh(new T.ExtrudeGeometry(wax,{depth:.03,bevelEnabled:true,bevelSize:.012,bevelThickness:.008,bevelSegments:2,curveSegments:6}),m.wax,seal);mesh(new T.TorusGeometry(.154,.008,6,36),m.wax,seal,[0,0,.042]);const c=crest(seal,m.wax,.135);c.position.z=.051;
  return {root,flap,letter,seal,setOpen(t){const crack=T.MathUtils.smoothstep(t,0,.25);seal.position.z=.132+crack*.27;seal.position.y=-.1-crack*.21;seal.rotation.z=crack*.3;seal.scale.setScalar(1-crack*.14);seal.visible=t<.42;flap.rotation.x=-T.MathUtils.smoothstep(t,.12,.7)*Math.PI*.96;const lift=T.MathUtils.smoothstep(t,.45,1);letter.position.y=lift*.79;letter.position.z=.025+lift*.24;const p=letterGeo.attributes.position;for(let i=0;i<p.count;i++){const x=original[i*3],y=original[i*3+1];p.setZ(i,Math.sin((y/h+.5)*Math.PI)*lift*.085+Math.sin(x/w*Math.PI)*lift*.04);}p.needsUpdate=true;letterGeo.computeVertexNormals();}};
