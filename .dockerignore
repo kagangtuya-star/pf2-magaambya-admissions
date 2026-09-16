@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.env
+previews
+docs
+tests
+*.log
+web/vendor

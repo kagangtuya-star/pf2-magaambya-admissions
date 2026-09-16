@@ -1,0 +1,20 @@
+{
+  "name": "magaambya-raincourt",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "postinstall": "node scripts/vendor.mjs",
+    "start": "node scripts/start.mjs",
+    "dev": "node --watch server/app.js",
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/test.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  }
+}

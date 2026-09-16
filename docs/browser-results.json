@@ -1,0 +1,123 @@
+{
+  "environment": "Chromium about:blank fixture; real local HTTP API; in-memory Storage fixture; static courtyard (Three dependency unavailable)",
+  "checks": [
+    {
+      "name": "Home renders",
+      "passed": true
+    },
+    {
+      "name": "No horizontal overflow on desktop",
+      "passed": true
+    },
+    {
+      "name": "Five branches dialog",
+      "passed": true
+    },
+    {
+      "name": "Dialog Escape",
+      "passed": true
+    },
+    {
+      "name": "Wrong unlock rejected",
+      "passed": true
+    },
+    {
+      "name": "Unlock enters sealed letter",
+      "passed": true
+    },
+    {
+      "name": "Seal enters letter",
+      "passed": true
+    },
+    {
+      "name": "Missing signature remains on name page",
+      "passed": true
+    },
+    {
+      "name": "Riddle page",
+      "passed": true
+    },
+    {
+      "name": "Incorrect riddle rejected",
+      "passed": true
+    },
+    {
+      "name": "Riddles accepted by server",
+      "passed": true
+    },
+    {
+      "name": "Required essay blocked",
+      "passed": true
+    },
+    {
+      "name": "Review before submission",
+      "passed": true
+    },
+    {
+      "name": "Untrusted name escaped",
+      "passed": true
+    },
+    {
+      "name": "Untrusted answer escaped",
+      "passed": true
+    },
+    {
+      "name": "Consent required",
+      "passed": true
+    },
+    {
+      "name": "Real server receipt",
+      "passed": true
+    },
+    {
+      "name": "Receipt download",
+      "passed": true
+    },
+    {
+      "name": "Mobile home no overflow",
+      "passed": true
+    },
+    {
+      "name": "Mobile folio no overflow",
+      "passed": true
+    },
+    {
+      "name": "Mobile material and answer visible",
+      "passed": true
+    },
+    {
+      "name": "Mobile questions no overflow",
+      "passed": true
+    },
+    {
+      "name": "Settings dialog closes",
+      "passed": true
+    },
+    {
+      "name": "Admin wrong password rejected",
+      "passed": true
+    },
+    {
+      "name": "Admin sees actual records",
+      "passed": true
+    },
+    {
+      "name": "Review saved",
+      "passed": true
+    },
+    {
+      "name": "Question editor mounted",
+      "passed": true
+    },
+    {
+      "name": "Settings data fetched",
+      "passed": true
+    },
+    {
+      "name": "No uncaught browser errors",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "time": "2026-09-15T15:00:58.824814+00:00"
+}

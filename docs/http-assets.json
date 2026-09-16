@@ -1,0 +1,120 @@
+{
+  "source": "Local HTTP server; source assets, not a dependency-complete production build",
+  "verified_assets": 19,
+  "assets": [
+    {
+      "path": "admin.css",
+      "bytes": 10347,
+      "sha256": "a9e7626a7268b28076670beef7e57771ad5b3c22719147c271fe9b0aebcbd826",
+      "matches_source": true
+    },
+    {
+      "path": "admin.js",
+      "bytes": 13603,
+      "sha256": "c8959e8fc7e2f1af803c35c494ae40e3de48304a746361a813242b8d92ad136e",
+      "matches_source": true
+    },
+    {
+      "path": "app.js",
+      "bytes": 27750,
+      "sha256": "58842e31cadadd499eab38bc8e96df8f96f90943eddadc4e2eb427c9c681d9aa",
+      "matches_source": true
+    },
+    {
+      "path": "assets/botanical.svg",
+      "bytes": 7761,
+      "sha256": "96a27c47b3dbb56ae0846b0e19e06333736ff2d9e0f160e5985cf1c463620a85",
+      "matches_source": true
+    },
+    {
+      "path": "assets/crest.svg",
+      "bytes": 430,
+      "sha256": "ee17e8d2fee2314a4efe7995c04c3853b5675db2b8c13db6e754a50cb6e03dc3",
+      "matches_source": true
+    },
+    {
+      "path": "assets/raincourt-poster.svg",
+      "bytes": 190047,
+      "sha256": "dc9f0feda49e78a49e1170527947d186e8ab625c2ceaa4cae8362c5a8c77d7ed",
+      "matches_source": true
+    },
+    {
+      "path": "index.html",
+      "bytes": 1077,
+      "sha256": "3ffeb0375b29d977806fadd2773b49e002ca64550f5c049415b9b09cb2cd2e23",
+      "matches_source": true
+    },
+    {
+      "path": "lib/api.js",
+      "bytes": 1260,
+      "sha256": "93768fb546765f2f8d87ec02b16506f60093b7b0afff3ff66a7d59cfcf07ee92",
+      "matches_source": true
+    },
+    {
+      "path": "lib/audio.js",
+      "bytes": 1883,
+      "sha256": "0bf709bbe3b573132d67cb53536bb0eeda7f101c8972dd60447e82e830d1a658",
+      "matches_source": true
+    },
+    {
+      "path": "lib/dom.js",
+      "bytes": 2544,
+      "sha256": "f217db91f128af2fe9e62e667137eb5f26073b2bc6ba29f4850717ca293c4632",
+      "matches_source": true
+    },
+    {
+      "path": "lib/state.js",
+      "bytes": 3507,
+      "sha256": "be96b24960b7d31f2f31081346bd745114cf862709a329359057a2b4b9dc02c4",
+      "matches_source": true
+    },
+    {
+      "path": "scene/batch.js",
+      "bytes": 2860,
+      "sha256": "225f97f48bc601f09d3e511a8fa9969aedb02d9f24a4744cd928bea6ea293bf8",
+      "matches_source": true
+    },
+    {
+      "path": "scene/compositor.js",
+      "bytes": 2717,
+      "sha256": "b19951d76dfbfe8083ce16e517e9d55144130c076d4a94abd77ed482de18dd73",
+      "matches_source": true
+    },
+    {
+      "path": "scene/courtyard.js",
+      "bytes": 7178,
+      "sha256": "c7c625bc32dfb198d8d6c3270a2e558425b47a1073ec6ea94a2daee1385e7df4",
+      "matches_source": true
+    },
+    {
+      "path": "scene/models.js",
+      "bytes": 7442,
+      "sha256": "1ee324e4003eeeaf9e4969a60c1b56f08b2260ec25feeefcb690e066749bfefd",
+      "matches_source": true
+    },
+    {
+      "path": "scene/scene.js",
+      "bytes": 13199,
+      "sha256": "de8556a2a7a0e43462b58f4dfa07b5d9ede5e47091330744ab792d9ef1fa422c",
+      "matches_source": true
+    },
+    {
+      "path": "scene/textures.js",
+      "bytes": 4177,
+      "sha256": "82f08202545e019cb2d9774f934605376b9b18d93b01e638784c99546f6fc712",
+      "matches_source": true
+    },
+    {
+      "path": "scene/water.js",
+      "bytes": 3809,
+      "sha256": "ef4bf3ecb1a2836447bca1e74848240f9bb5d19df915c1001a36ccb99813c306",
+      "matches_source": true
+    },
+    {
+      "path": "style.css",
+      "bytes": 35493,
+      "sha256": "98c48dbfffd730455cd379e0ce4a9b8916c5da8b61677c4bc9bce7bd4d0b4255",
+      "matches_source": true
+    }
+  ]
+}

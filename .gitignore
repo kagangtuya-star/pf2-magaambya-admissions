@@ -1,0 +1,6 @@
+node_modules/
+dist/
+web/vendor/
+.env
+server/data/submissions.json
+*.log

@@ -1,0 +1,328 @@
+TAP version 13
+# Subtest: POST /api/admin/session returns admin token
+ok 1 - POST /api/admin/session returns admin token
+  ---
+  duration_ms: 23.549372
+  type: 'test'
+  ...
+# Subtest: GET /api/admin/settings returns public configuration fields
+ok 2 - GET /api/admin/settings returns public configuration fields
+  ---
+  duration_ms: 11.961267
+  type: 'test'
+  ...
+# Subtest: GET /api/admin/exam-content returns full content including correct_key
+ok 3 - GET /api/admin/exam-content returns full content including correct_key
+  ---
+  duration_ms: 10.110804
+  type: 'test'
+  ...
+# Subtest: PUT /api/admin/settings updates settings
+ok 4 - PUT /api/admin/settings updates settings
+  ---
+  duration_ms: 12.87145
+  type: 'test'
+  ...
+# Subtest: GET /api/admin/submissions and GET /api/admin/submissions/:id expose saved entries
+ok 5 - GET /api/admin/submissions and GET /api/admin/submissions/:id expose saved entries
+  ---
+  duration_ms: 21.374108
+  type: 'test'
+  ...
+# Subtest: PATCH /api/admin/submissions/:id and GET /api/admin/stats work
+ok 6 - PATCH /api/admin/submissions/:id and GET /api/admin/stats work
+  ---
+  duration_ms: 20.103372
+  type: 'test'
+  ...
+# Subtest: shouldStartServer supports unix style paths
+ok 7 - shouldStartServer supports unix style paths
+  ---
+  duration_ms: 0.62958
+  type: 'test'
+  ...
+# Subtest: shouldStartServer supports windows style paths
+ok 8 - shouldStartServer supports windows style paths
+  ---
+  duration_ms: 0.10126
+  type: 'test'
+  ...
+# Subtest: shouldStartServer rejects other entry files
+ok 9 - shouldStartServer rejects other entry files
+  ---
+  duration_ms: 0.088301
+  type: 'test'
+  ...
+# Subtest: writeJsonFile writes JSON atomically and readJsonFile reads it back
+ok 10 - writeJsonFile writes JSON atomically and readJsonFile reads it back
+  ---
+  duration_ms: 4.266612
+  type: 'test'
+  ...
+# Subtest: POST /api/public/unlock returns attempt token for valid spell
+ok 11 - POST /api/public/unlock returns attempt token for valid spell
+  ---
+  duration_ms: 23.341875
+  type: 'test'
+  ...
+# Subtest: GET /api/public/exam hides correct_key from clients
+ok 12 - GET /api/public/exam hides correct_key from clients
+  ---
+  duration_ms: 15.038972
+  type: 'test'
+  ...
+# Subtest: POST /api/public/riddles/verify validates the answer
+ok 13 - POST /api/public/riddles/verify validates the answer
+  ---
+  duration_ms: 16.971767
+  type: 'test'
+  ...
+# Subtest: POST /api/public/submissions persists a submission
+ok 14 - POST /api/public/submissions persists a submission
+  ---
+  duration_ms: 14.42818
+  type: 'test'
+  ...
+# Subtest: signAdminToken returns a verifiable admin token
+ok 15 - signAdminToken returns a verifiable admin token
+  ---
+  duration_ms: 2.903028
+  type: 'test'
+  ...
+# Subtest: signAttemptToken returns a verifiable attempt token
+ok 16 - signAttemptToken returns a verifiable attempt token
+  ---
+  duration_ms: 0.275467
+  type: 'test'
+  ...
+# Subtest: Private JSON files are not statically exposed
+ok 17 - Private JSON files are not statically exposed
+  ---
+  duration_ms: 27.912455
+  type: 'test'
+  ...
+# Subtest: HTML has a restrictive security policy
+ok 18 - HTML has a restrictive security policy
+  ---
+  duration_ms: 7.817206
+  type: 'test'
+  ...
+# Subtest: All admin reads require admin authentication
+ok 19 - All admin reads require admin authentication
+  ---
+  duration_ms: 10.218172
+  type: 'test'
+  ...
+# Subtest: Public token cannot access administrator data
+ok 20 - Public token cannot access administrator data
+  ---
+  duration_ms: 13.927381
+  type: 'test'
+  ...
+# Subtest: Malformed JSON is a client error
+ok 21 - Malformed JSON is a client error
+  ---
+  duration_ms: 2.984338
+  type: 'test'
+  ...
+# Subtest: Array JSON is rejected
+ok 22 - Array JSON is rejected
+  ---
+  duration_ms: 2.659438
+  type: 'test'
+  ...
+# Subtest: Submitting without complete essays is rejected
+ok 23 - Submitting without complete essays is rejected
+  ---
+  duration_ms: 6.911638
+  type: 'test'
+  ...
+# Subtest: Wrong riddle answer cannot be bypassed on submission
+ok 24 - Wrong riddle answer cannot be bypassed on submission
+  ---
+  duration_ms: 6.640819
+  type: 'test'
+  ...
+# Subtest: Retrying an attempt returns the same persisted receipt
+ok 25 - Retrying an attempt returns the same persisted receipt
+  ---
+  duration_ms: 13.198573
+  type: 'test'
+  ...
+# Subtest: Changed question version invalidates an old attempt
+ok 26 - Changed question version invalidates an old attempt
+  ---
+  duration_ms: 5.312616
+  type: 'test'
+  ...
+# Subtest: Admin rate limit is bounded and expires
+ok 27 - Admin rate limit is bounded and expires
+  ---
+  duration_ms: 1.987114
+  type: 'test'
+  ...
+# Subtest: Non-authentication endpoints are not counted by login limiter
+ok 28 - Non-authentication endpoints are not counted by login limiter
+  ---
+  duration_ms: 0.184482
+  type: 'test'
+  ...
+# Subtest: Actual Three.js model geometry and articulation
+ok 29 - Actual Three.js model geometry and articulation # SKIP Install Three.js before running geometry tests. This is not a GPU render test.
+  ---
+  duration_ms: 0.61623
+  type: 'test'
+  ...
+# Subtest: Flow follows all seven phases
+ok 30 - Flow follows all seven phases
+  ---
+  duration_ms: 2.096186
+  type: 'test'
+  ...
+# Subtest: Cannot jump from arrival to receipt
+ok 31 - Cannot jump from arrival to receipt
+  ---
+  duration_ms: 0.294305
+  type: 'test'
+  ...
+# Subtest: Review can return to writing
+ok 32 - Review can return to writing
+  ---
+  duration_ms: 0.313043
+  type: 'test'
+  ...
+# Subtest: Machine notifies and unsubscribes
+ok 33 - Machine notifies and unsubscribes
+  ---
+  duration_ms: 0.180086
+  type: 'test'
+  ...
+# Subtest: Unknown transitions are rejected
+ok 34 - Unknown transitions are rejected
+  ---
+  duration_ms: 0.096783
+  type: 'test'
+  ...
+# Subtest: Blank drafts use independent answer objects
+ok 35 - Blank drafts use independent answer objects
+  ---
+  duration_ms: 1.791335
+  type: 'test'
+  ...
+# Subtest: Reject foreign draft format
+ok 36 - Reject foreign draft format
+  ---
+  duration_ms: 0.240085
+  type: 'test'
+  ...
+# Subtest: Reject arrays as drafts
+ok 37 - Reject arrays as drafts
+  ---
+  duration_ms: 0.097844
+  type: 'test'
+  ...
+# Subtest: Limit signature and essay lengths
+ok 38 - Limit signature and essay lengths
+  ---
+  duration_ms: 0.380242
+  type: 'test'
+  ...
+# Subtest: Drop unsafe object keys
+ok 39 - Drop unsafe object keys
+  ---
+  duration_ms: 1.333199
+  type: 'test'
+  ...
+# Subtest: Filter obsolete questions on schema update
+ok 40 - Filter obsolete questions on schema update
+  ---
+  duration_ms: 0.234517
+  type: 'test'
+  ...
+# Subtest: Drop unknown radio options
+ok 41 - Drop unknown radio options
+  ---
+  duration_ms: 0.104594
+  type: 'test'
+  ...
+# Subtest: Clamp imported page position
+ok 42 - Clamp imported page position
+  ---
+  duration_ms: 0.089642
+  type: 'test'
+  ...
+# Subtest: Storage round trip
+ok 43 - Storage round trip
+  ---
+  duration_ms: 0.497875
+  type: 'test'
+  ...
+# Subtest: Corrupt stored draft recovers without crashing
+ok 44 - Corrupt stored draft recovers without crashing
+  ---
+  duration_ms: 0.111965
+  type: 'test'
+  ...
+# Subtest: Unavailable storage recovers on read
+ok 45 - Unavailable storage recovers on read
+  ---
+  duration_ms: 0.151684
+  type: 'test'
+  ...
+# Subtest: Unavailable storage propagates save failure
+ok 46 - Unavailable storage propagates save failure
+  ---
+  duration_ms: 0.099407
+  type: 'test'
+  ...
+# Subtest: Missing answers map to exact pages
+ok 47 - Missing answers map to exact pages
+  ---
+  duration_ms: 0.159706
+  type: 'test'
+  ...
+# Subtest: Complete draft has no missing fields
+ok 48 - Complete draft has no missing fields
+  ---
+  duration_ms: 0.182189
+  type: 'test'
+  ...
+# Subtest: Whitespace is not a written answer
+ok 49 - Whitespace is not a written answer
+  ---
+  duration_ms: 0.075431
+  type: 'test'
+  ...
+# Subtest: HTML is escaped, not injected
+ok 50 - HTML is escaped, not injected
+  ---
+  duration_ms: 0.12848
+  type: 'test'
+  ...
+# Subtest: Easing has correct endpoints and midpoint
+ok 51 - Easing has correct endpoints and midpoint
+  ---
+  duration_ms: 0.082181
+  type: 'test'
+  ...
+# Subtest: Procedural materials use deterministic seeds
+ok 52 - Procedural materials use deterministic seeds
+  ---
+  duration_ms: 0.129301
+  type: 'test'
+  ...
+# Subtest: Expired review credentials can return to the seal without losing the draft
+ok 53 - Expired review credentials can return to the seal without losing the draft
+  ---
+  duration_ms: 0.064486
+  type: 'test'
+  ...
+1..53
+# tests 53
+# suites 0
+# pass 52
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 808.977982

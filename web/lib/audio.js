@@ -1,0 +1,9 @@
+export class CourtyardAudio {
+  enabled=false; context=null; gain=null; sources=[];
+  async toggle(){ if(this.enabled){this.enabled=false;this.gain?.gain.setTargetAtTime(0,this.context.currentTime,.35);return false;} const Context=window.AudioContext||window.webkitAudioContext;if(!Context)throw new Error('当前浏览器无法播放庭院音景。'); if(!this.context)this.create(Context);await this.context.resume();this.enabled=true;this.gain.gain.setTargetAtTime(.075,this.context.currentTime,.8);this.chime();return true;}
+  create(Context){const ctx=this.context=new Context(),gain=this.gain=ctx.createGain();gain.gain.value=0;gain.connect(ctx.destination);const buffer=ctx.createBuffer(1,ctx.sampleRate*5,ctx.sampleRate),data=buffer.getChannelData(0);let last=0;for(let i=0;i<data.length;i++){last=(last+.02*(Math.random()*2-1))/1.02;data[i]=last*3.5;}const source=ctx.createBufferSource();source.buffer=buffer;source.loop=true;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=1800;source.connect(filter).connect(gain);source.start();this.sources.push(source);}
+  chime(){if(!this.enabled||!this.context)return;const ctx=this.context;[523.25,783.99,1046.5].forEach((frequency,i)=>{const osc=ctx.createOscillator(),gain=ctx.createGain(),at=ctx.currentTime+i*.11;osc.type='sine';osc.frequency.value=frequency;gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(.13/(i+1),at+.012);gain.gain.exponentialRampToValueAtTime(.0001,at+1.8);osc.connect(gain).connect(this.gain);osc.start(at);osc.stop(at+1.9);osc.onended=()=>{osc.disconnect();gain.disconnect();};});}
+  pause(){this.context?.suspend().catch(()=>{});}
+  resume(){if(this.enabled)this.context?.resume().catch(()=>{});}
+  dispose(){this.sources.forEach(s=>{try{s.stop();}catch{}});this.sources=[];this.context?.close().catch(()=>{});this.context=null;this.enabled=false;}
+}

@@ -1,0 +1,5 @@
+import {mkdtemp,cp,rm,writeFile,readdir} from 'node:fs/promises';import {tmpdir} from 'node:os';import path from 'node:path';import {spawn} from 'node:child_process';import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url)),dir=await mkdtemp(path.join(tmpdir(),'raincourt-test-'));await cp(path.join(root,'server/data'),dir,{recursive:true});await writeFile(path.join(dir,'submissions.json'),JSON.stringify({items:[],updated_at:new Date().toISOString()}));
+const testFiles=[];for(const dir of ['server/tests','tests'])for(const name of await readdir(path.join(root,dir)))if(name.endsWith('.test.js'))testFiles.push(path.join(dir,name));
+const child=spawn(process.execPath,['--test','--test-concurrency=1',...testFiles],{cwd:root,env:{...process.env,NODE_ENV:'test',MAGIC_DATA_DIR:dir,MAGIC_SCHOOL_SECRET:'raincourt-test-key-not-for-production-use',ADMIN_PASSPHRASE:''},stdio:'inherit'});
+const code=await new Promise(resolve=>{child.on('error',()=>resolve(1));child.on('exit',c=>resolve(c??1));});await rm(dir,{recursive:true,force:true});process.exitCode=code;

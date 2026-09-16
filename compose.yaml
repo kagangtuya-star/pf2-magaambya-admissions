@@ -1,0 +1,14 @@
+services:
+  raincourt:
+    build: .
+    ports:
+      - "127.0.0.1:${PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      ADMIN_PASSPHRASE: ${ADMIN_PASSPHRASE:?Set ADMIN_PASSPHRASE in .env}
+      MAGIC_SCHOOL_SECRET: ${MAGIC_SCHOOL_SECRET:?Set MAGIC_SCHOOL_SECRET in .env}
+    volumes:
+      - raincourt-data:/app/server/data
+    restart: unless-stopped
+volumes:
+  raincourt-data:
