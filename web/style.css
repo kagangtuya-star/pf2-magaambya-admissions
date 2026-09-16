@@ -6,7 +6,8 @@
 
 
 :root{--landing-progress:0}
-.landing-home .masthead,.landing-home .site-footer{transition:opacity .45s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.landing-home .masthead,.landing-home .site-footer{opacity:0;pointer-events:none;transform:translateY(20px);transition:opacity .45s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.landing-home .masthead{transform:translateY(-20px)}
 .landing-screen{position:relative;z-index:5}
 .landing-scroll{position:relative;height:320svh}
 .landing-frame{position:sticky;top:0;min-height:100svh;overflow:hidden;display:flex;align-items:center;padding:70px 8.3vw 73px;pointer-events:none}
@@ -16,8 +17,9 @@
 .landing-prompt__line{display:block;width:1px;height:68px;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(211,199,156,.88))}
 .landing-prompt p{font-family:var(--serif);font-size:clamp(24px,3.4vw,42px);letter-spacing:.18em;line-height:1.35}
 .landing-prompt small{font-size:11px;letter-spacing:.18em;color:#c7d0bf}
-.landing-prompt i{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid rgba(211,199,156,.34);border-radius:999px;background:rgba(10,22,19,.32);animation:landing-pulse 1.8s ease-in-out infinite}
-.landing-prompt i svg{transform:rotate(90deg)}
+.landing-prompt__button{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid rgba(211,199,156,.34);border-radius:999px;background:rgba(10,22,19,.32);color:inherit;pointer-events:auto;animation:landing-pulse 1.8s ease-in-out infinite;transition:border-color .25s ease,background-color .25s ease}
+.landing-prompt__button:hover{border-color:rgba(211,199,156,.72);background:rgba(10,22,19,.52)}
+.landing-prompt__button svg{transform:rotate(90deg)}
 .landing-copy{position:relative;z-index:3;pointer-events:none;opacity:0;transform:translateY(32px);transition:opacity .45s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
 .landing-copy .hero-actions,.landing-copy .hero-actions>*{pointer-events:auto}
 .landing-caption{z-index:3;opacity:0;transform:translateY(18px);transition:opacity .45s ease,transform .6s cubic-bezier(.2,.8,.2,1)}

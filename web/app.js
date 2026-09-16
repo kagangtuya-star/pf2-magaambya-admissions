@@ -123,6 +123,7 @@ function startAdmissions() {
     );
     const poster = $(".landing-poster"),
       prompt = $(".landing-prompt"),
+      promptButton = $(".landing-prompt__button"),
       copy = $(".landing-copy"),
       caption = $(".landing-caption"),
       masthead = $(".masthead"),
@@ -138,9 +139,11 @@ function startAdmissions() {
       poster.style.filter = `blur(${(1 - reveal3d) * 2.2}px)`;
     }
     if (prompt) {
+      const promptHidden = promptFade < 0.08;
       prompt.style.opacity = String(promptFade);
       prompt.style.transform = `translateY(${(1 - promptFade) * 16}px)`;
-      prompt.setAttribute("aria-hidden", promptFade < 0.08 ? "true" : "false");
+      prompt.setAttribute("aria-hidden", promptHidden ? "true" : "false");
+      if (promptButton) promptButton.tabIndex = promptHidden ? -1 : 0;
     }
     if (copy) {
       copy.style.opacity = String(copyReveal);
@@ -170,8 +173,13 @@ function startAdmissions() {
   }
   function destroyLanding(reset = true) {
     if (landingController) {
+      landingController.cancelScroll();
       window.removeEventListener("scroll", landingController.onScroll);
       window.removeEventListener("resize", landingController.onResize);
+      window.removeEventListener("wheel", landingController.cancelScroll);
+      window.removeEventListener("touchstart", landingController.cancelScroll);
+      window.removeEventListener("pointerdown", landingController.cancelScroll);
+      window.removeEventListener("keydown", landingController.cancelScroll);
       landingController = null;
     }
     if (reset) {
@@ -220,15 +228,48 @@ function startAdmissions() {
       if (frame) return;
       frame = requestAnimationFrame(sync);
     };
+    let scrollFrame = 0;
+    const cancelScroll = () => {
+      if (!scrollFrame) return;
+      cancelAnimationFrame(scrollFrame);
+      scrollFrame = 0;
+    };
+    const scrollForward = () => {
+      cancelScroll();
+      const start = window.scrollY;
+      const trackTop = start + track.getBoundingClientRect().top;
+      const target = trackTop + Math.max(0, track.offsetHeight - window.innerHeight);
+      const distance = target - start;
+      if (distance <= 1) return;
+      if (preferences.reduced) {
+        window.scrollTo({ top: target, behavior: "instant" });
+        return;
+      }
+      const startedAt = performance.now();
+      const duration = clamp(Math.abs(distance) * 2, 2200, 4400);
+      const animate = (now) => {
+        const progress = clamp((now - startedAt) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        window.scrollTo(0, start + distance * eased);
+        scrollFrame = progress < 1 ? requestAnimationFrame(animate) : 0;
+      };
+      scrollFrame = requestAnimationFrame(animate);
+    };
     landingController = {
       track,
       sync,
       requestSync,
+      scrollForward,
+      cancelScroll,
       onScroll: requestSync,
       onResize: requestSync,
     };
     window.addEventListener("scroll", requestSync, { passive: true });
     window.addEventListener("resize", requestSync, { passive: true });
+    window.addEventListener("wheel", cancelScroll, { passive: true });
+    window.addEventListener("touchstart", cancelScroll, { passive: true });
+    window.addEventListener("pointerdown", cancelScroll, { passive: true });
+    window.addEventListener("keydown", cancelScroll);
     sync();
   }
   function render() {
@@ -244,7 +285,7 @@ function startAdmissions() {
   function view() {
     switch (machine.phase) {
       case "arrival":
-        return `<main id="main" class="landing-screen"><section class="landing-scroll"><div class="landing-frame"><div class="landing-poster" aria-hidden="true"></div><div class="landing-prompt"><span class="landing-prompt__line"></span><p>玛甘比来信</p><small>向下滑动，接收你的魔法信件。</small><i>${icon("arrow", 18)}</i></div><div class="hero-copy landing-copy"><p class="eyebrow"><span class="fine-line"></span> 纳塔穆博 · 雨庭来信</p><h1 tabindex="-1">让你的故事<br><em>在此生根。</em></h1><p class="hero-description">先从这封着来信的匣子开始。<br>点击赴学院之约，凑近凉亭中的学院信匣。</p><div class="hero-actions">${button("赴学院之约", "approach")}<button type="button" class="understated" data-action="direct">直接阅信 ${icon("arrow", 16)}</button></div></div><div class="scene-caption landing-caption" aria-hidden="true"><span>庭院里的来信</span><small>THE COURTYARD LETTER</small><i></i></div><div class="hero-edition" aria-hidden="true">I</div><div class="landing-progressmark" aria-hidden="true"><span></span></div></div></section></main>`;
+        return `<main id="main" class="landing-screen"><section class="landing-scroll"><div class="landing-frame"><div class="landing-poster" aria-hidden="true"></div><div class="landing-prompt"><span class="landing-prompt__line"></span><p>玛甘比来信</p><small>向下滑动，接收你的魔法信件。</small><button type="button" class="landing-prompt__button" data-action="landing-scroll" aria-label="向下滚动，接收魔法信件">${icon("arrow", 18)}</button></div><div class="hero-copy landing-copy"><p class="eyebrow"><span class="fine-line"></span> 纳塔穆博 · 雨庭来信</p><h1 tabindex="-1">让你的故事<br><em>在此生根。</em></h1><p class="hero-description">先从这封着来信的匣子开始。<br>点击赴学院之约，凑近凉亭中的学院信匣。</p><div class="hero-actions">${button("赴学院之约", "approach")}<button type="button" class="understated" data-action="direct">直接阅信 ${icon("arrow", 16)}</button></div></div><div class="scene-caption landing-caption" aria-hidden="true"><span>庭院里的来信</span><small>THE COURTYARD LETTER</small><i></i></div><div class="hero-edition" aria-hidden="true">I</div><div class="landing-progressmark" aria-hidden="true"><span></span></div></div></section></main>`;
       case "chest":
         return `<main id="main" class="stage-screen"><div class="stage-copy"><button class="back-link" type="button" data-action="home">${icon("back", 17)} 返回庭院</button><p class="eyebrow">第一笺 <span>/</span> AN INVITATION</p><h1 tabindex="-1">一封为你<br>留存的来信。</h1><p class="stage-description">铜扣仍带着雨后的凉意。<br>说出交予你的启封词，让来信重见天光。</p><form id="unlock-form"><label class="field-label" for="spell">启封词</label><div class="spell-field"><input id="spell" name="spell" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="120" placeholder="在此写下启封词" required aria-describedby="unlock-error"><span>${icon("leaf")}</span></div><p id="unlock-error" class="form-error" role="alert"></p><button class="primary" type="submit" ${busy ? "disabled" : ""}>${busy ? "正在启封" : "开启来信"}<span>${icon("arrow")}</span></button></form></div><div class="object-note" aria-hidden="true">I <span>学院信匣</span></div></main>`;
       case "letter":
@@ -582,6 +623,9 @@ function startAdmissions() {
   }
   async function action(name) {
     switch (name) {
+      case "landing-scroll":
+        landingController?.scrollForward();
+        break;
       case "approach":
         skipMotion = false;
         await go("chest");
