@@ -12,6 +12,13 @@
 - **主持人档案室**：查看来信、保存状态和批注，编辑与导入导出题库，修改启封词和暂停收信。
 - **显示与音景**：响应式书页、画质设置、减少动态与静态模式，以及可开关的本地背景音乐。三维不可用时仍可填写问卷。
 
+<img width="1841" height="979" alt="PixPin_2026-09-16_18-23-33" src="https://github.com/user-attachments/assets/d464b6f1-9579-4155-9bfc-0f24dcc1c3c2" />
+<img width="1743" height="974" alt="PixPin_2026-09-16_18-23-48" src="https://github.com/user-attachments/assets/fbc3d2b9-7d10-4047-8e59-070f829ed569" />
+<img width="1587" height="970" alt="PixPin_2026-09-16_18-24-18" src="https://github.com/user-attachments/assets/73a69117-cca7-4fe7-bef8-c40db853c0e0" />
+<img width="1860" height="979" alt="PixPin_2026-09-16_18-24-35" src="https://github.com/user-attachments/assets/5c296534-875e-4e72-aa25-87b686014b71" />
+<img width="1803" height="964" alt="PixPin_2026-09-16_18-24-53" src="https://github.com/user-attachments/assets/e38eb232-677c-45a6-94bb-8cc4a5b0ef2b" />
+<img width="1795" height="982" alt="PixPin_2026-09-16_18-25-08" src="https://github.com/user-attachments/assets/eeb91ef4-6d61-4069-a62c-0d305d4f81da" />
+
 ## 本地启动
 
 安装 Node.js 20 或以上版本，在项目目录执行：
