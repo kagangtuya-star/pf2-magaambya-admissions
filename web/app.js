@@ -17,6 +17,7 @@ import {
   persistDraft,
   missingAnswers,
   completion,
+  seeded,
   DRAFT_KEY,
 } from "./lib/state.js";
 import { request, session } from "./lib/api.js";
@@ -40,6 +41,38 @@ function readPreferences() {
     return {};
   }
 }
+// A deterministic arcane circle: outer rune ring and an inner five-node star for the five branches.
+function sigil(className = "arcane-sigil") {
+  if (!sigil.markup) {
+    const random = seeded(1469),
+      polar = (r, a) =>
+        `${(100 + Math.cos(a) * r).toFixed(2)} ${(100 + Math.sin(a) * r).toFixed(2)}`;
+    const ticks = Array.from({ length: 72 }, (_, i) => {
+      const a = (i / 72) * Math.PI * 2,
+        long = i % 6 === 0;
+      return `M${polar(long ? 89 : 92, a)}L${polar(95, a)}`;
+    }).join("");
+    const glyphs = Array.from({ length: 24 }, (_, i) => {
+      const a = (i / 24) * Math.PI * 2,
+        cx = 100 + Math.cos(a) * 82,
+        cy = 100 + Math.sin(a) * 82;
+      return Array.from({ length: 2 + Math.floor(random() * 2) }, () => {
+        const x1 = cx + (random() - 0.5) * 6,
+          y1 = cy + (random() - 0.5) * 6,
+          x2 = cx + (random() - 0.5) * 6,
+          y2 = cy + (random() - 0.5) * 6;
+        return `M${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}`;
+      }).join("");
+    }).join("");
+    const nodes = Array.from({ length: 5 }, (_, i) =>
+      polar(48, -Math.PI / 2 + (i / 5) * Math.PI * 2),
+    );
+    const star = [0, 2, 4, 1, 3, 0].map((n, i) => `${i ? "L" : "M"}${nodes[n]}`).join("");
+    const pentagon = `M${nodes.join("L")}Z`;
+    sigil.markup = `<g class="sigil-outer"><circle cx="100" cy="100" r="97" pathLength="1"/><circle cx="100" cy="100" r="95" stroke-width=".4" pathLength="1"/><path d="${ticks}" stroke-width=".5"/><circle cx="100" cy="100" r="76" pathLength="1"/><circle cx="100" cy="100" r="74" stroke-width=".4" pathLength="1"/><path class="sigil-glyphs" d="${glyphs}" stroke-width=".8"/></g><g class="sigil-inner"><circle cx="100" cy="100" r="62" stroke-width=".5" pathLength="1"/><path d="${pentagon}" stroke-width=".7" pathLength="1"/><path d="${star}" stroke-width=".5" pathLength="1"/>${nodes.map((n) => `<circle cx="${n.split(" ")[0]}" cy="${n.split(" ")[1]}" r="6" stroke-width=".7"/>`).join("")}<circle cx="100" cy="100" r="16" stroke-width=".6" pathLength="1"/></g>`;
+  }
+  return `<svg class="${className}" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true" focusable="false">${sigil.markup}</svg>`;
+}
 function startAdmissions() {
   const machine = createMachine(),
     audio = new CourtyardAudio();
@@ -61,37 +94,44 @@ function startAdmissions() {
     flat: stored.flat ?? false,
   };
   let landingController = null,
-    landingProgress = 0;
+    landingProgress = 0,
+    lastView = "",
+    lastPage = page;
   const branchData = [
     [
       "承流学会",
       "想象",
       "推崇想象力，包含从最有远见的魔法理论家的设想，到各种富含创意的解决问题的奇思妙想。",
       "cascade",
+      "#6fb3c8",
     ],
     [
       "翠枝学社",
       "情谊",
       "强调友情、社区意识和与玛甘比校友们的联系；他们还善于与玛甘比之外的人互动，传递学院的信息。",
       "boughs",
+      "#86b36d",
     ],
     [
       "雨幕书会",
       "适应",
       "重视思想和实践上的适应能力，善于从失败中总结教训。",
       "rain",
+      "#8fa6c4",
     ],
     [
       "岚阳法盟",
       "勇气",
       "强调勇气，不仅是为帮助朋友和学校而行动，更注重思想上的勇气：敢于反对权威，而不是墨守成规。",
       "courage",
+      "#d27a4c",
     ],
     [
       "传智学派",
       "知识",
       "相信知识不仅存在于世代相传的故事中，也能通过个人实践获得。",
       "knowledge",
+      "#cfa75a",
     ],
   ];
   function brand() {
@@ -109,6 +149,17 @@ function startAdmissions() {
   }
   function footer() {
     return `<footer class="site-footer"><span class="footer-location"><i></i> 纳塔穆博 <span class="footer-slash">/</span> THE RAINCOURT</span><span class="footer-project">万千之力 · 入学档案</span><a href="/admin" class="archive-link">档案室 ${icon("arrow", 15)}</a></footer>`;
+  }
+  function recruitStatus() {
+    const open = site.submission_enabled !== false;
+    return `<p class="recruit-status ${open ? "" : "is-closed"}"><i aria-hidden="true"></i><span>${open ? "学院正在收信 · 招募进行中" : "学院暂停收信 · 可先阅信与留稿"}</span></p>`;
+  }
+  function sparks() {
+    return Array.from({ length: 14 }, (_, i) => {
+      const angle = (i / 14) * 360 + (i % 3) * 7,
+        distance = 58 + (i % 4) * 16;
+      return `<i style="--a:${angle}deg;--d:${distance}px;--t:${(0.75 + (i % 5) * 0.09).toFixed(2)}s"></i>`;
+    }).join("");
   }
   const button = (label, action, kind = "primary", extra = "") =>
     `<button type="button" class="${kind}" data-action="${action}" ${extra}>${label}<span>${icon("arrow")}</span></button>`;
@@ -276,6 +327,18 @@ function startAdmissions() {
     const phase = machine.phase;
     document.body.className = `phase-${phase} ${sceneFailed || preferences.flat ? "scene-flat" : ""} ${preferences.reduced ? "reduced-motion" : ""} ${phase === "arrival" ? "landing-home" : ""}`;
     $("#app").innerHTML = header() + view() + footer();
+    const viewKey = phase === "writing" && content ? `writing:${page}` : phase,
+      main = $("#main");
+    if (main && viewKey !== lastView) {
+      const turning = lastView.startsWith("writing:") && viewKey.startsWith("writing:");
+      main.classList.add(turning ? "page-turn" : "is-entering");
+      if (turning) {
+        main.classList.add(page > lastPage ? "turn-next" : "turn-prev");
+        audio.rustle();
+      }
+    }
+    lastView = viewKey;
+    lastPage = page;
     bindCommon();
     bindView();
     updateProgress();
@@ -285,19 +348,19 @@ function startAdmissions() {
   function view() {
     switch (machine.phase) {
       case "arrival":
-        return `<main id="main" class="landing-screen"><section class="landing-scroll"><div class="landing-frame"><div class="landing-poster" aria-hidden="true"></div><div class="landing-prompt"><span class="landing-prompt__line"></span><p>玛甘比来信</p><small>向下滑动，接收你的魔法信件。</small><button type="button" class="landing-prompt__button" data-action="landing-scroll" aria-label="向下滚动，接收魔法信件">${icon("arrow", 18)}</button></div><div class="hero-copy landing-copy"><p class="eyebrow"><span class="fine-line"></span> 纳塔穆博 · 雨庭来信</p><h1 tabindex="-1">让你的故事<br><em>在此生根。</em></h1><p class="hero-description">先从这封着来信的匣子开始。<br>点击赴学院之约，凑近凉亭中的学院信匣。</p><div class="hero-actions">${button("赴学院之约", "approach")}<button type="button" class="understated" data-action="direct">直接阅信 ${icon("arrow", 16)}</button></div></div><div class="scene-caption landing-caption" aria-hidden="true"><span>庭院里的来信</span><small>THE COURTYARD LETTER</small><i></i></div><div class="hero-edition" aria-hidden="true">I</div><div class="landing-progressmark" aria-hidden="true"><span></span></div></div></section></main>`;
+        return `<main id="main" class="landing-screen"><section class="landing-scroll"><div class="landing-frame"><div class="landing-poster" aria-hidden="true"></div><div class="landing-prompt">${sigil("arcane-sigil landing-sigil")}<span class="landing-prompt__line"></span><p>玛甘比来信</p><small>向下滑动，接收你的魔法信件。</small><button type="button" class="landing-prompt__button" data-action="landing-scroll" aria-label="向下滚动，接收魔法信件">${icon("arrow", 18)}</button></div><div class="hero-copy landing-copy"><p class="eyebrow"><span class="fine-line"></span> 纳塔穆博 · 雨庭来信</p><h1 tabindex="-1">让你的故事<br><em>在此生根。</em></h1><p class="hero-description">先从这封着来信的匣子开始。<br>点击赴学院之约，凑近凉亭中的学院信匣。</p><div class="hero-actions">${button("赴学院之约", "approach")}<button type="button" class="understated" data-action="direct">直接阅信 ${icon("arrow", 16)}</button></div>${recruitStatus()}</div><div class="scene-caption landing-caption" aria-hidden="true"><span>庭院里的来信</span><small>THE COURTYARD LETTER</small><i></i></div><div class="hero-edition" aria-hidden="true">I</div><div class="landing-progressmark" aria-hidden="true"><span></span></div></div></section></main>`;
       case "chest":
-        return `<main id="main" class="stage-screen"><div class="stage-copy"><button class="back-link" type="button" data-action="home">${icon("back", 17)} 返回庭院</button><p class="eyebrow">第一笺 <span>/</span> AN INVITATION</p><h1 tabindex="-1">一封为你<br>留存的来信。</h1><p class="stage-description">铜扣仍带着雨后的凉意。<br>说出交予你的启封词，让来信重见天光。</p><form id="unlock-form"><label class="field-label" for="spell">启封词</label><div class="spell-field"><input id="spell" name="spell" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="120" placeholder="在此写下启封词" required aria-describedby="unlock-error"><span>${icon("leaf")}</span></div><p id="unlock-error" class="form-error" role="alert"></p><button class="primary" type="submit" ${busy ? "disabled" : ""}>${busy ? "正在启封" : "开启来信"}<span>${icon("arrow")}</span></button></form></div><div class="object-note" aria-hidden="true">I <span>学院信匣</span></div></main>`;
+        return `<main id="main" class="stage-screen"><div class="stage-copy"><button class="back-link" type="button" data-action="home">${icon("back", 17)} 返回庭院</button><p class="eyebrow">第一笺 <span>/</span> AN INVITATION</p><h1 tabindex="-1">一封为你<br>留存的来信。</h1><p class="stage-description">铜扣仍带着雨后的凉意。<br>说出交予你的启封词，让来信重见天光。</p><form id="unlock-form"><label class="field-label" for="spell">启封词</label><div class="spell-field"><input id="spell" name="spell" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="120" placeholder="在此写下启封词" required aria-describedby="unlock-error"><span>${icon("leaf")}</span><i class="spell-glow" aria-hidden="true"></i></div><p id="unlock-error" class="form-error" role="alert"></p><button class="primary" type="submit" ${busy ? "disabled" : ""}>${busy ? "正在启封" : "开启来信"}<span>${icon("arrow")}</span></button></form></div><div class="object-note" aria-hidden="true">I <span>学院信匣</span></div></main>`;
       case "letter":
         return `<main id="main" class="stage-screen"><div class="stage-copy"><p class="eyebrow">第二笺 <span>/</span> A QUIET BEGINNING</p><h1 tabindex="-1">封蜡之下，<br>故事初始。</h1><p class="stage-description">薄纸承载的，并不只是邀约。<br>还有一群愿意与你同行的人。</p>${button("揭开封蜡", "unseal", "primary", busy ? "disabled" : "")}<button class="understated separate" type="button" data-action="read-now">直接阅读 ${icon("arrow", 16)}</button></div><div class="object-note" aria-hidden="true">II <span>寄给求学者</span></div></main>`;
       case "invitation":
-        return `<main id="main" class="invitation-screen"><article class="invitation-paper"><div class="letter-top"><img src="/assets/crest.svg" alt="" width="56" height="56"><span>MAGAAMBYA<small>NANTAMBU</small></span></div><p class="eyebrow">致远道而来的求学者</p><h1 tabindex="-1">你的来处，<br>也是知识的来处。</h1><div class="letter-prose"><p>在这里，我们珍视的不只是你能施展何种魔法，还有你愿意为谁运用它。</p><p>带来你的疑问，你的经历，以及尚未成形的想法。你会向前人学习，也会成为后来者的引路人。</p><p>请在下一页留下名字与故事。我们期待认识你。</p></div><div class="letter-signature"><span>玛甘比学院</span><small>THE MAGAAMBYA</small></div>${button("开始书写", "write")}<span class="paper-page-number">01</span></article></main>`;
+        return `<main id="main" class="invitation-screen"><article class="invitation-paper">${sigil("arcane-sigil paper-watermark")}<div class="letter-top"><img src="/assets/crest.svg" alt="" width="56" height="56"><span>MAGAAMBYA<small>NANTAMBU</small></span></div><p class="eyebrow">致远道而来的求学者</p><h1 tabindex="-1">你的来处，<br>也是知识的来处。</h1><div class="letter-prose"><p>在这里，我们珍视的不只是你能施展何种魔法，还有你愿意为谁运用它。</p><p>带来你的疑问，你的经历，以及尚未成形的想法。你会向前人学习，也会成为后来者的引路人。</p><p>请在下一页留下名字与故事。我们期待认识你。</p></div><div class="letter-signature"><span>玛甘比学院</span><small>THE MAGAAMBYA</small></div>${button("开始书写", "write")}<span class="paper-page-number">01</span></article></main>`;
       case "writing":
         return writingView();
       case "review":
         return reviewView();
       case "receipt":
-        return `<main id="main" class="receipt-screen"><article class="receipt-paper"><div class="receipt-seal">${icon("check", 32)}</div><p class="eyebrow">LETTER RECEIVED</p><h1 tabindex="-1">你的故事，<br>已抵达学院。</h1><p class="receipt-intro">${esc(receipt?.player_name || draft.name)}，谢谢你认真写下这一切。<br>来信已收存，静待主持人阅览。</p><dl class="receipt-meta"><div><dt>档案编号</dt><dd>${esc(receipt?.submission_id || "")}</dd></div><div><dt>收信时间</dt><dd>${receipt ? new Date(receipt.created_at).toLocaleString("zh-CN") : ""}</dd></div></dl><div class="receipt-actions">${button("保存来信副本", "receipt-export", "paper-button")}<button type="button" class="understated" data-action="restart">返回庭院 ${icon("arrow", 16)}</button></div></article></main>`;
+        return `<main id="main" class="receipt-screen"><article class="receipt-paper"><div class="receipt-seal"><span class="seal-wave" aria-hidden="true"></span>${sigil("arcane-sigil seal-sigil")}${icon("check", 32)}<span class="seal-sparks" aria-hidden="true">${sparks()}</span></div><p class="eyebrow">LETTER RECEIVED</p><h1 tabindex="-1">你的故事，<br>已抵达学院。</h1><p class="receipt-intro">${esc(receipt?.player_name || draft.name)}，谢谢你认真写下这一切。<br>来信已收存，静待主持人阅览。</p><dl class="receipt-meta"><div><dt>档案编号</dt><dd>${esc(receipt?.submission_id || "")}</dd></div><div><dt>收信时间</dt><dd>${receipt ? new Date(receipt.created_at).toLocaleString("zh-CN") : ""}</dd></div></dl><div class="receipt-actions">${button("保存来信副本", "receipt-export", "paper-button")}<button type="button" class="understated" data-action="restart">返回庭院 ${icon("arrow", 16)}</button></div></article></main>`;
       default:
         return "";
     }
@@ -437,6 +500,11 @@ function startAdmissions() {
       $("#progress-bar").style.width = `${(p.done / p.total) * 100}%`;
     if ($("#progress-text"))
       $("#progress-text").textContent = `已落笔 ${p.done} / ${p.total}`;
+    if (!content) return;
+    const open = new Set(missingAnswers(draft, content).map((m) => m.page));
+    $$(".folio-nav [data-page]").forEach((el) =>
+      el.classList.toggle("done", !open.has(Number(el.dataset.page))),
+    );
   }
   async function unlock(event) {
     event.preventDefault();
@@ -447,6 +515,7 @@ function startAdmissions() {
     const submit = $("#unlock-form button");
     submit.disabled = true;
     submit.firstChild.textContent = "正在启封";
+    $("#unlock-form").classList.add("casting");
     $("#unlock-error").textContent = "";
     try {
       const result = await request("/api/public/unlock", {
@@ -470,6 +539,13 @@ function startAdmissions() {
     } catch (error) {
       busy = false;
       if ($("#unlock-error")) $("#unlock-error").textContent = error.message;
+      $("#unlock-form")?.classList.remove("casting");
+      const field = $(".spell-field");
+      if (field) {
+        field.classList.remove("shake");
+        void field.offsetWidth;
+        field.classList.add("shake");
+      }
       if (submit.isConnected) {
         submit.disabled = false;
         submit.firstChild.textContent = "开启来信";
@@ -722,7 +798,7 @@ function startAdmissions() {
   }
   function showBranches() {
     openDialog(
-      `<p class="eyebrow">FIVE BRANCHES · ONE COMMUNITY</p><h2>五种求知的方式，<br>同一座学院。</h2><p class="dialog-intro">学派强调不同的价值，而知识在彼此交流中生长。</p><div class="branches">${branchData.map(([name, value, text, glyph], i) => `<article><span class="branch-number">0${i + 1}</span><div><h3>${name}<small>${value}</small></h3><p>${text}</p></div><span class="branch-glyph ${glyph}" aria-hidden="true">${icon(glyph, 28)}</span></article>`).join("")}</div>`,
+      `<p class="eyebrow">FIVE BRANCHES · ONE COMMUNITY</p><h2>五种求知的方式，<br>同一座学院。</h2><p class="dialog-intro">学派强调不同的价值，而知识在彼此交流中生长。</p><div class="branches">${branchData.map(([name, value, text, glyph, accent], i) => `<article style="--branch:${accent}"><span class="branch-number">0${i + 1}</span><div><h3>${name}<small>${value}</small></h3><p>${text}</p></div><span class="branch-glyph ${glyph}" aria-hidden="true">${icon(glyph, 28)}</span></article>`).join("")}</div>`,
     );
   }
   function showDraft() {
@@ -849,6 +925,9 @@ function startAdmissions() {
   request("/api/public/site")
     .then((data) => {
       site = data;
+      $(".recruit-status")?.replaceWith(
+        document.createRange().createContextualFragment(recruitStatus()),
+      );
       if (!data.submission_enabled)
         toast("学院目前暂停收信，你仍可阅信和保存草稿。");
     })
@@ -868,6 +947,23 @@ function startAdmissions() {
     passive: true,
   });
   document.addEventListener("keydown", activateAudio, true);
+  let pointerFrame = 0,
+    pointerX = 0,
+    pointerY = 0;
+  document.addEventListener(
+    "pointermove",
+    (event) => {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      if (pointerFrame || preferences.reduced) return;
+      pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = 0;
+        document.documentElement.style.setProperty("--mx", `${pointerX}px`);
+        document.documentElement.style.setProperty("--my", `${pointerY}px`);
+      });
+    },
+    { passive: true },
+  );
   document.addEventListener("visibilitychange", () =>
     document.hidden ? audio.pause() : audio.resume(),
   );

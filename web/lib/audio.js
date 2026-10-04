@@ -68,6 +68,36 @@ export class CourtyardAudio {
     });
   }
 
+  // A short band-passed noise sweep, heard as paper turning over.
+  rustle() {
+    if (!this.enabled || !this.context) return;
+    const ctx = this.context,
+      length = Math.floor(ctx.sampleRate * 0.42),
+      buffer = ctx.createBuffer(1, length, ctx.sampleRate),
+      data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+      const t = i / length;
+      data[i] = (Math.random() * 2 - 1) * Math.pow(Math.sin(Math.PI * t), 1.6) * (0.6 + 0.4 * Math.random());
+    }
+    const source = ctx.createBufferSource(),
+      filter = ctx.createBiquadFilter(),
+      gain = ctx.createGain(),
+      at = ctx.currentTime;
+    filter.type = "bandpass";
+    filter.Q.value = 0.8;
+    filter.frequency.setValueAtTime(1400, at);
+    filter.frequency.exponentialRampToValueAtTime(3600, at + 0.38);
+    gain.gain.value = 0.22;
+    source.buffer = buffer;
+    source.connect(filter).connect(gain).connect(this.gain);
+    source.start(at);
+    source.onended = () => {
+      source.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+    };
+  }
+
   pause() {
     this.context?.suspend().catch(() => {});
     this.music?.pause();

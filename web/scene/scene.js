@@ -5,6 +5,7 @@ import {buildCourtyard} from './courtyard.js';
 import {Rainwater} from './water.js';
 import {CourtyardCompositor} from './compositor.js';
 import {batchStatic} from './batch.js';
+import {ArcaneSigil} from './arcane.js';
 import {seeded,ease} from '../lib/state.js';
 
 const views={
@@ -17,6 +18,9 @@ const views={
  review:{eye:[4.2,7.4,7.7],look:[0,1.8,0],open:1,lift:0,unfold:1},
  receipt:{eye:[7.8,5.9,11.5],look:[-1.7,2.6,-.4],open:0,lift:0,unfold:0}
 };
+// How strongly the floor sigil, rune band and chest light answer each phase.
+const charge={arrival:.3,chest:.45,letter:.9,invitation:.6,writing:.12,review:.12,receipt:.75};
+const bursts={unlock:700,unseal:500,release:150};
 function environment(renderer){
  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=512;const ctx=canvas.getContext('2d'),g=ctx.createLinearGradient(0,0,0,512);
  g.addColorStop(0,'#a2b5ac');g.addColorStop(.42,'#c8c9ad');g.addColorStop(.62,'#617768');g.addColorStop(1,'#222e25');ctx.fillStyle=g;ctx.fillRect(0,0,1024,512);
@@ -53,9 +57,9 @@ export class RaincourtScene {
   this.desk=buildDesk(this.materials);this.desk.position.y=.3;this.scene.add(this.desk);this.chest=buildChest(this.materials);this.chest.root.position.y=1.77;this.scene.add(this.chest.root);
   this.envelope=buildEnvelope(this.materials);this.envelope.root.position.set(0,2.04,0);this.envelope.root.rotation.x=-Math.PI/2;this.envelope.root.scale.setScalar(.9);this.scene.add(this.envelope.root);this.batchStats=[batchStatic(this.courtyard.root),batchStatic(this.desk),batchStatic(this.chest.root,[this.chest.lid]),batchStatic(this.chest.lid),batchStatic(this.envelope.root,[this.envelope.flap,this.envelope.letter,this.envelope.seal])];this.values={open:0,lift:0,unfold:0};
   this.scene.add(new T.HemisphereLight(0xd3dec3,0x2d3527,2.0));const sun=new T.DirectionalLight(0xffdfa6,3.1);sun.position.set(7,12,7);sun.castShadow=true;sun.shadow.mapSize.set(quality==='high'?2048:1024,quality==='high'?2048:1024);sun.shadow.camera.left=-11;sun.shadow.camera.right=11;sun.shadow.camera.top=11;sun.shadow.camera.bottom=-11;sun.shadow.camera.near=1;sun.shadow.camera.far=35;sun.shadow.bias=-.0002;sun.shadow.normalBias=.03;this.sun=sun;this.scene.add(sun);const fill=new T.DirectionalLight(0xaad4c4,.8);fill.position.set(-5,6,-8);this.scene.add(fill);
-  this.water=new Rainwater(this.renderer,this.scene,quality);this.compositor=new CourtyardCompositor(this.renderer);this.compositor.enabled=quality==='high';this.makeMotes();
+  this.water=new Rainwater(this.renderer,this.scene,quality);this.compositor=new CourtyardCompositor(this.renderer);this.compositor.enabled=quality==='high';this.arcane=new ArcaneSigil(this.scene);this.arcane.target=charge.arrival*.5;this.makeMotes();
   this.raycaster=new T.Raycaster();this.ndc=new T.Vector2();this.hit=null;
-  this.onMove=e=>{this.pointer.set((e.clientX/window.innerWidth-.5)*2,(e.clientY/window.innerHeight-.5)*2);this.hasPointer=true;this.ndc.copy(this.pointer);this.ndc.y*=-1;this.raycaster.setFromCamera(this.ndc,this.camera);const targets=this.phase==='letter'?[this.envelope.seal]:[this.chest.root];this.hit=this.raycaster.intersectObjects(targets,true)[0];this.renderer.domElement.style.cursor=this.hit?'pointer':'default';};
+  this.onMove=e=>{this.pointer.set((e.clientX/window.innerWidth-.5)*2,(e.clientY/window.innerHeight-.5)*2);this.hasPointer=true;this.ndc.copy(this.pointer);this.ndc.y*=-1;this.raycaster.setFromCamera(this.ndc,this.camera);const targets=this.phase==='letter'?[this.envelope.seal]:[this.chest.root];this.hit=this.raycaster.intersectObjects(targets,true)[0];this.renderer.domElement.style.cursor=this.hit?'pointer':'default';const hover=this.hit&&['arrival','chest','letter'].includes(this.phase)?1:0;if(hover!==this.arcane.hover){this.arcane.hover=hover;this.start();}};
   this.onClick=e=>{this.onMove(e);if(this.hit&&['arrival','chest','letter'].includes(this.phase))this.onActivate(this.phase);};
   this.onLost=e=>{e.preventDefault();this.stop();container.classList.remove('is-ready');this.onFailure('context-lost');};
   this.onRestored=()=>this.onFailure('context-restored');
@@ -67,8 +71,8 @@ export class RaincourtScene {
  captureCurrentPose(){return {eye:this.camera.position.clone(),look:this.look.clone(),open:this.values.open,lift:this.values.lift,unfold:this.values.unfold};}
  captureTarget(name){return poseFromView(this.targetView(name));}
  makeMotes(){
-  const random=seeded(812),positions=new Float32Array(96*3);for(let i=0;i<96;i++){positions[i*3]=(random()-.5)*16;positions[i*3+1]=random()*7;positions[i*3+2]=(random()-.5)*13;}
-  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.BufferAttribute(positions,3));const material=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,uniforms:{uTime:{value:0},uRatio:{value:1}},vertexShader:'uniform float uTime,uRatio;varying float vFade;void main(){vec3 p=position;p.x+=sin(uTime*.2+position.z)*.08;p.y+=sin(uTime*.3+position.x)*.06;vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;gl_PointSize=clamp(18./-mv.z,1.,3.)*uRatio;vFade=.08+.1*sin(position.x*3.+uTime*.4);}',fragmentShader:'varying float vFade;void main(){float a=1.-smoothstep(.08,.5,length(gl_PointCoord-.5));gl_FragColor=vec4(.85,.72,.4,a*vFade);}'});this.motes=new T.Points(geometry,material);this.scene.add(this.motes);
+  const random=seeded(812),count=150,positions=new Float32Array(count*3);for(let i=0;i<count;i++){positions[i*3]=(random()-.5)*16;positions[i*3+1]=random()*7;positions[i*3+2]=(random()-.5)*13;}
+  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.BufferAttribute(positions,3));const material=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,uniforms:{uTime:{value:0},uRatio:{value:1},uSurge:{value:0}},vertexShader:'uniform float uTime,uRatio,uSurge;varying float vFade;varying float vJade;void main(){vec3 p=position;p.x+=sin(uTime*.2+position.z)*.08;p.y+=sin(uTime*.3+position.x)*.06;float r=.55+mod(length(position.xz)*.37,1.75);float a=atan(position.z,position.x)+uTime*(.35+.5/r);float h=1.85+fract(position.y*.173+uTime*.07)*4.4;p=mix(p,vec3(cos(a)*r,h,sin(a)*r),uSurge*.9);vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;gl_PointSize=clamp((18.+uSurge*16.)/-mv.z,1.,3.+uSurge*2.)*uRatio;vFade=.08+.1*sin(position.x*3.+uTime*.4)+uSurge*.32*(1.-fract(position.y*.173+uTime*.07));vJade=step(.62,fract(position.x*7.31));}',fragmentShader:'varying float vFade;varying float vJade;void main(){float a=1.-smoothstep(.08,.5,length(gl_PointCoord-.5));gl_FragColor=vec4(mix(vec3(.95,.74,.4),vec3(.45,.95,.78),vJade*.7),a*vFade);}'});this.motes=new T.Points(geometry,material);this.scene.add(this.motes);
  }
  resize(){
   if(this.disposed)return;const w=this.container.clientWidth||innerWidth,h=this.container.clientHeight||innerHeight,ratio=Math.min(devicePixelRatio||1,this.quality==='high'?1.8:this.quality==='low'?1:1.35);this.renderer.setPixelRatio(ratio);this.renderer.setSize(w,h);this.camera.aspect=w/h;this.camera.fov=w<680?53:43;this.camera.updateProjectionMatrix();this.compositor.resize(w,h,ratio);this.motes.material.uniforms.uRatio.value=ratio;
@@ -87,7 +91,7 @@ export class RaincourtScene {
   return pose;
  }
  setLandingProgress(progress=1){
-  this.landingProgress=clamp01(progress);
+  this.landingProgress=clamp01(progress);if(this.phase==='arrival')this.arcane.target=charge.arrival*(.5+this.landingProgress*.5);
   if(this.phase==='arrival'&&!this.motion){this.applyPose(this.landingPose(this.landingProgress));this.start();}
  }
  applyPose(pose){
@@ -124,7 +128,7 @@ export class RaincourtScene {
   return blendPose(pose,b,settle);
  }
  go(name,{instant=false,profile=null}={}){
-  if(!views[name]||this.disposed)return Promise.resolve();this.resolveMotion?.();const fromPhase=this.phase;const chosen=instant||this.reduced?{name:'instant',duration:0}:profile?{name:profile,duration:profileFor(fromPhase,name,false).duration}:profileFor(fromPhase,name,this.reduced);this.phase=name;
+  if(!views[name]||this.disposed)return Promise.resolve();this.resolveMotion?.();const fromPhase=this.phase;const chosen=instant||this.reduced?{name:'instant',duration:0}:profile?{name:profile,duration:profileFor(fromPhase,name,false).duration}:profileFor(fromPhase,name,this.reduced);this.phase=name;this.arcane.target=name==='arrival'?charge.arrival*(.5+this.landingProgress*.5):charge[name];if(chosen.name in bursts)this.arcane.burst(bursts[chosen.name]);
   const promise=new Promise(resolve=>this.resolveMotion=resolve);this.motion={from:this.captureCurrentPose(),to:this.captureTarget(name),profile:chosen,at:performance.now(),duration:chosen.duration};if(chosen.duration===0){this.applyPose(this.motion.to);this.motion=null;this.resolveMotion?.();this.resolveMotion=null;return Promise.resolve();}this.start();return promise;
  }
  tick(now){
@@ -142,11 +146,12 @@ export class RaincourtScene {
     const v=this.targetView(this.phase);this.camera.position.set(v.eye[0]+this.parallax.x*.13,v.eye[1]-this.parallax.y*.075,v.eye[2]);this.camera.lookAt(this.look);
    }
   }
-  this.courtyard.vegetation.time.value=this.time;this.motes.material.uniforms.uTime.value=this.time;
+  const arcaneBusy=this.arcane.update(dt,this.time,now,{lift:this.values.lift,reduced:this.reduced});
+  this.courtyard.vegetation.time.value=this.time;this.motes.material.uniforms.uTime.value=this.time;this.motes.material.uniforms.uSurge.value=T.MathUtils.smoothstep(this.arcane.level,.45,.95);
   this.renderer.shadowMap.autoUpdate=wasMoving||this.frame<2;
   try{this.water.update(this.camera,this.time,!reading);this.compositor.render(this.scene,this.camera,this.time,this.camera.position.distanceTo(this.look));if(this.renderFault)throw new Error('A scene shader could not be compiled.');}catch(error){console.error('Raincourt render failed.',error);this.stop();this.resolveMotion?.();this.resolveMotion=null;this.onFailure('render-failed');return;}this.frame++;
   if(this.frame>=1)this.container.classList.add('is-ready');
-  if(!settled||(!reading&&!this.reduced))this.raf=requestAnimationFrame(this.tick);
+  if(!settled||arcaneBusy||(!reading&&!this.reduced))this.raf=requestAnimationFrame(this.tick);
  }
  start(){if(this.disposed||this.hidden||this.raf)return;this.last=0;this.raf=requestAnimationFrame(this.tick);} 
  stop(){cancelAnimationFrame(this.raf);this.raf=0;this.last=0;}
@@ -155,7 +160,7 @@ export class RaincourtScene {
  dispose(){
   if(this.disposed)return;this.disposed=true;this.stop();this.resolveMotion?.();this.resizeObserver.disconnect();document.removeEventListener('visibilitychange',this.visibility);
   const canvas=this.renderer.domElement;canvas.removeEventListener('pointermove',this.onMove);canvas.removeEventListener('click',this.onClick);canvas.removeEventListener('webglcontextlost',this.onLost);canvas.removeEventListener('webglcontextrestored',this.onRestored);
-  const gs=new Set(),ms=new Set();this.scene.traverse(o=>{if(o.geometry)gs.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>ms.add(m));});gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose());this.courtyard.vegetation.depth.dispose();this.materials.textures.forEach(t=>t.dispose());this.env.dispose();this.water.dispose();this.compositor.dispose();this.sun.shadow.dispose();this.renderer.dispose();this.renderer.forceContextLoss();canvas.remove();
+  const gs=new Set(),ms=new Set();this.scene.traverse(o=>{if(o.geometry)gs.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>ms.add(m));});gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose());this.courtyard.vegetation.depth.dispose();this.arcane.dispose();this.materials.textures.forEach(t=>t.dispose());this.env.dispose();this.water.dispose();this.compositor.dispose();this.sun.shadow.dispose();this.renderer.dispose();this.renderer.forceContextLoss();canvas.remove();
  }
 }
 export function createScene(container,options){return new RaincourtScene(container,options);}
