@@ -808,21 +808,33 @@ function startAdmissions() {
         break;
     }
   }
-  function showFilm() {
+  async function showFilm() {
+    await siteReady;
+    const film = site.film || { mode: 'local', src: FILM.src };
+    if (film.mode === 'unavailable') {
+      toast('学院影像暂时不可用，请联系主持人。');
+      return;
+    }
+    const player = film.mode === 'bilibili'
+      ? `<iframe src="${esc(film.src)}" title="玛甘比学院宣传影像：歌风之城的来信" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
+      : `<video src="${esc(film.src)}" controls autoplay playsinline preload="auto" poster="${FILM.poster}" aria-label="玛甘比学院宣传影像：歌风之城的来信">当前浏览器无法播放此影像。</video>`;
     openDialog(
-      `<div class="film-frame"><video controls autoplay playsinline preload="auto" poster="${FILM.poster}" aria-label="玛甘比学院宣传影像：歌风之城的来信"><source src="${FILM.src}" type="video/webm">当前浏览器无法播放此影像。</video></div><p class="film-caption"><span>玛甘比学院 · 歌风之城的来信</span><small>团务宣传影像 · 约一分钟</small></p>`,
+      `<div class="film-frame">${player}</div><p class="film-caption"><span>玛甘比学院 · 歌风之城的来信</span><small>团务宣传影像 · 约一分钟</small></p>`,
       (dialog) => {
         const video = $("video", dialog);
         filmOpen = true;
         dialog.classList.add("film-dialog");
         // The film carries its own score, so the courtyard music rests while it plays.
-        video.addEventListener("play", () => audio.pause());
-        video.addEventListener("error", () => toast("影像暂时无法播放，请稍后重试。"), true);
+        if (video) {
+          video.addEventListener("play", () => audio.pause());
+          video.addEventListener("error", () => toast("影像暂时无法播放，请稍后重试。"), true);
+        } else audio.pause();
         dialog.addEventListener(
           "close",
           () => {
             filmOpen = false;
-            video.pause();
+            video?.pause();
+            $("iframe", dialog)?.remove();
             dialog.classList.remove("film-dialog");
             audio.resume();
           },
@@ -957,7 +969,7 @@ function startAdmissions() {
     }
   }
   render();
-  request("/api/public/site")
+  const siteReady = request("/api/public/site")
     .then((data) => {
       site = data;
       $(".recruit-status")?.replaceWith(

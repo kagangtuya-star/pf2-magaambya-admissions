@@ -7,6 +7,10 @@ services:
       NODE_ENV: production
       ADMIN_PASSPHRASE: ${ADMIN_PASSPHRASE:?Set ADMIN_PASSPHRASE in .env}
       MAGIC_SCHOOL_SECRET: ${MAGIC_SCHOOL_SECRET:?Set MAGIC_SCHOOL_SECRET in .env}
+      FILM_MODE: ${FILM_MODE:-local}
+      FILM_LOCAL_URL: ${FILM_LOCAL_URL:-/media/promo/magaambya-promo.webm}
+      FILM_DIRECT_URL: ${FILM_DIRECT_URL:-}
+      FILM_BILIBILI_URL: ${FILM_BILIBILI_URL:-}
     volumes:
       - raincourt-data:/app/server/data
     restart: unless-stopped

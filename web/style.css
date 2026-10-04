@@ -238,7 +238,7 @@ dialog[open] .branches article:nth-child(5){animation-delay:.28s}
 .film-teaser__text small{display:block;font-size:10px;letter-spacing:.14em;color:#a9a88c}
 dialog.film-dialog{width:min(1180px,calc(100vw - 48px),calc((100svh - 150px) * 16 / 9));max-height:none;padding:0;overflow:hidden;background:#040b09;color:var(--paper)}
 .film-dialog .film-frame{aspect-ratio:16/9;background:#000}
-.film-dialog video{display:block;width:100%;height:100%;background:#000}
+.film-dialog video,.film-dialog iframe{display:block;width:100%;height:100%;border:0;background:#000}
 .film-dialog .film-caption{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:13px 22px 15px;font-family:var(--serif);font-size:13px;letter-spacing:.16em;color:#e8dcc0}
 .film-dialog .film-caption small{font-family:var(--sans);font-size:10px;letter-spacing:.12em;color:#8f927c}
 .film-dialog .dialog-close{top:10px;right:10px;z-index:2;color:#efe6cf;background:rgba(4,11,9,.5);border-radius:50%}

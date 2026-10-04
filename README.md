@@ -53,6 +53,10 @@ Windows 可以双击 `start.bat`，Linux 与 macOS 可以执行 `sh start.sh`；
 | `MAGIC_SCHOOL_SECRET` | 启动时生成临时密钥 | 凭据签名密钥；生产模式必填，至少 32 个字符 |
 | `MAGIC_DATA_DIR` | `server/data/` | 数据目录，可指定独立的持久化目录 |
 | `SERVE_DIST` | 未设置 | 设置为 `1` 时提供构建后的 `dist/` 资源 |
+| `FILM_MODE` | `local` | 学院影像播放方式：`local`、`direct`、`bilibili` |
+| `FILM_LOCAL_URL` | `/media/promo/magaambya-promo.webm` | 本地视频的本站路径 |
+| `FILM_DIRECT_URL` | 空 | 视频文件的完整 HTTP/HTTPS 直链 |
+| `FILM_BILIBILI_URL` | 空 | 哔哩哔哩视频页面链接或外链播放器链接 |
 
 可用以下命令生成随机签名密钥：
 
@@ -61,6 +65,22 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
 生产模式下，管理口令或签名密钥长度不足会拒绝启动。开发时未固定签名密钥，重启服务后原有登录和答题凭据会失效，需要重新登录或启封。
+
+### 学院影像播放方式
+
+`.env.example` 提供中文注释和三种链接填写示例。只需修改 `FILM_MODE` 和对应链接，然后重启服务；Docker Compose 同样会读取这些设置。默认使用上一版修复后的本地 WebM。
+
+每种方式只读取自己的链接配置：选择 `bilibili` 时须填写 `FILM_BILIBILI_URL`。链接缺失或无效时仅停用学院影像，网站仍可启动和使用问卷，启动日志会说明需要修正的配置。
+
+| 播放方式 | 配置示例 |
+| --- | --- |
+| 本地视频 | `FILM_MODE=local`，`FILM_LOCAL_URL=/media/promo/magaambya-promo.webm` |
+| 视频直链 | `FILM_MODE=direct`，`FILM_DIRECT_URL=https://cdn.example.com/magaambya-promo.webm` |
+| 哔哩哔哩嵌入 | `FILM_MODE=bilibili`，`FILM_BILIBILI_URL=https://www.bilibili.com/video/BV1B7411m7LV/?p=1` |
+
+直链的域名与路径、哔哩哔哩的 BV 号均为格式示例，请替换为实际学院影像地址。直链必须返回浏览器支持的视频文件，视频详情页或需专用播放器的播放列表不能作为直链；HTTPS 网站请使用 HTTPS 视频地址，有跳转时填写最终地址。
+
+哔哩哔哩也可直接填写 `https://player.bilibili.com/player.html?bvid=BV1B7411m7LV&p=1&autoplay=1`。视频页面链接会自动转换成官方外链播放器地址，支持 BV/av 号与分 P；关闭弹窗会卸载嵌入播放器，停止声音。嵌入格式参考[哔哩哔哩官方说明](https://player.bilibili.com/)。
 
 ## 主持人使用
 

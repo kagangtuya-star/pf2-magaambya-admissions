@@ -1,5 +1,6 @@
 import { SETTINGS_PATH } from '../constants.js';
 import { readJsonFile, writeJsonFile } from '../utils/fileStore.js';
+import { resolveFilmConfig } from './filmService.js';
 
 export async function getSettings() {
   return readJsonFile(SETTINGS_PATH);
@@ -11,6 +12,7 @@ export async function getPublicSettings() {
     submission_enabled: settings.submission_enabled,
     site_title: settings.site_title,
     updated_at: settings.updated_at,
+    film: resolveFilmConfig(),
   };
 }
 
