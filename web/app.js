@@ -23,6 +23,11 @@ import {
 import { request, session } from "./lib/api.js";
 import { CourtyardAudio } from "./lib/audio.js";
 
+const FILM = {
+  src: "/media/promo/magaambya-promo.webm",
+  poster: "/media/promo/poster.webp",
+};
+
 initDialog();
 if (location.pathname.startsWith("/admin")) {
   document.body.className = "administration scene-flat";
@@ -86,7 +91,8 @@ function startAdmissions() {
     receipt = null,
     site = { submission_enabled: true },
     savingFailed = false,
-    skipMotion = false;
+    skipMotion = false,
+    filmOpen = false;
   const stored = readPreferences();
   let preferences = {
     quality: stored.quality || (innerWidth < 680 ? "low" : "balanced"),
@@ -138,7 +144,7 @@ function startAdmissions() {
     return `<a class="brand" href="/" aria-label="玛甘比学院首页"><img src="/assets/crest.svg" alt="" width="44" height="44"><span>玛甘比学院<small>MAGAAMBYA</small></span></a>`;
   }
   function header() {
-    return `<header class="masthead">${brand()}<nav class="top-nav" aria-label="主导航"><button type="button" data-action="branches" class="text-button">学院五支</button><button type="button" data-action="draft" class="text-button draft-nav">我的草稿</button><span class="nav-divider"></span><button type="button" class="icon-button" data-action="sound" aria-label="${audio.enabled ? "关闭音景" : "聆听庭院"}" aria-pressed="${audio.enabled}">${icon(audio.enabled ? "sound" : "mute")}</button><button type="button" class="icon-button" data-action="settings" aria-label="阅读与画面设置">${icon("tune")}</button></nav></header>`;
+    return `<header class="masthead">${brand()}<nav class="top-nav" aria-label="主导航"><button type="button" data-action="film" class="text-button film-nav">学院影像</button><button type="button" data-action="branches" class="text-button">学院五支</button><button type="button" data-action="draft" class="text-button draft-nav">我的草稿</button><span class="nav-divider"></span><button type="button" class="icon-button" data-action="sound" aria-label="${audio.enabled ? "关闭音景" : "聆听庭院"}" aria-pressed="${audio.enabled}">${icon(audio.enabled ? "sound" : "mute")}</button><button type="button" class="icon-button" data-action="settings" aria-label="阅读与画面设置">${icon("tune")}</button></nav></header>`;
   }
   function syncSoundControl() {
     const control = $('[data-action="sound"]');
@@ -160,6 +166,9 @@ function startAdmissions() {
         distance = 58 + (i % 4) * 16;
       return `<i style="--a:${angle}deg;--d:${distance}px;--t:${(0.75 + (i % 5) * 0.09).toFixed(2)}s"></i>`;
     }).join("");
+  }
+  function filmTeaser() {
+    return `<button type="button" class="film-teaser" data-action="film" aria-label="播放学院宣传影像，约一分钟"><span class="film-teaser__thumb" aria-hidden="true"><img src="${FILM.poster}" alt="" width="96" height="54" loading="lazy" decoding="async"><i>${icon("play", 14)}</i></span><span class="film-teaser__text"><strong>观看学院影像</strong><small>歌风之城的来信 · 1:00</small></span></button>`;
   }
   const button = (label, action, kind = "primary", extra = "") =>
     `<button type="button" class="${kind}" data-action="${action}" ${extra}>${label}<span>${icon("arrow")}</span></button>`;
@@ -348,7 +357,7 @@ function startAdmissions() {
   function view() {
     switch (machine.phase) {
       case "arrival":
-        return `<main id="main" class="landing-screen"><section class="landing-scroll"><div class="landing-frame"><div class="landing-poster" aria-hidden="true"></div><div class="landing-prompt">${sigil("arcane-sigil landing-sigil")}<span class="landing-prompt__line"></span><p>玛甘比来信</p><small>向下滑动，接收你的魔法信件。</small><button type="button" class="landing-prompt__button" data-action="landing-scroll" aria-label="向下滚动，接收魔法信件">${icon("arrow", 18)}</button></div><div class="hero-copy landing-copy"><p class="eyebrow"><span class="fine-line"></span> 纳塔穆博 · 雨庭来信</p><h1 tabindex="-1">让你的故事<br><em>在此生根。</em></h1><p class="hero-description">先从这封着来信的匣子开始。<br>点击赴学院之约，凑近凉亭中的学院信匣。</p><div class="hero-actions">${button("赴学院之约", "approach")}<button type="button" class="understated" data-action="direct">直接阅信 ${icon("arrow", 16)}</button></div>${recruitStatus()}</div><div class="scene-caption landing-caption" aria-hidden="true"><span>庭院里的来信</span><small>THE COURTYARD LETTER</small><i></i></div><div class="hero-edition" aria-hidden="true">I</div><div class="landing-progressmark" aria-hidden="true"><span></span></div></div></section></main>`;
+        return `<main id="main" class="landing-screen"><section class="landing-scroll"><div class="landing-frame"><div class="landing-poster" aria-hidden="true"></div><div class="landing-prompt">${sigil("arcane-sigil landing-sigil")}<span class="landing-prompt__line"></span><p>玛甘比来信</p><small>向下滑动，接收你的魔法信件。</small><button type="button" class="landing-prompt__button" data-action="landing-scroll" aria-label="向下滚动，接收魔法信件">${icon("arrow", 18)}</button></div><div class="hero-copy landing-copy"><p class="eyebrow"><span class="fine-line"></span> 纳塔穆博 · 雨庭来信</p><h1 tabindex="-1">让你的故事<br><em>在此生根。</em></h1><p class="hero-description">先从这封着来信的匣子开始。<br>点击赴学院之约，凑近凉亭中的学院信匣。</p><div class="hero-actions">${button("赴学院之约", "approach")}<button type="button" class="understated" data-action="direct">直接阅信 ${icon("arrow", 16)}</button></div>${recruitStatus()}${filmTeaser()}</div><div class="scene-caption landing-caption" aria-hidden="true"><span>庭院里的来信</span><small>THE COURTYARD LETTER</small><i></i></div><div class="hero-edition" aria-hidden="true">I</div><div class="landing-progressmark" aria-hidden="true"><span></span></div></div></section></main>`;
       case "chest":
         return `<main id="main" class="stage-screen"><div class="stage-copy"><button class="back-link" type="button" data-action="home">${icon("back", 17)} 返回庭院</button><p class="eyebrow">第一笺 <span>/</span> AN INVITATION</p><h1 tabindex="-1">一封为你<br>留存的来信。</h1><p class="stage-description">铜扣仍带着雨后的凉意。<br>说出交予你的启封词，让来信重见天光。</p><form id="unlock-form"><label class="field-label" for="spell">启封词</label><div class="spell-field"><input id="spell" name="spell" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="120" placeholder="在此写下启封词" required aria-describedby="unlock-error"><span>${icon("leaf")}</span><i class="spell-glow" aria-hidden="true"></i></div><p id="unlock-error" class="form-error" role="alert"></p><button class="primary" type="submit" ${busy ? "disabled" : ""}>${busy ? "正在启封" : "开启来信"}<span>${icon("arrow")}</span></button></form></div><div class="object-note" aria-hidden="true">I <span>学院信匣</span></div></main>`;
       case "letter":
@@ -777,6 +786,9 @@ function startAdmissions() {
         page = 0;
         go("arrival");
         break;
+      case "film":
+        showFilm();
+        break;
       case "branches":
         showBranches();
         break;
@@ -795,6 +807,29 @@ function startAdmissions() {
         }
         break;
     }
+  }
+  function showFilm() {
+    openDialog(
+      `<div class="film-frame"><video controls autoplay playsinline preload="auto" poster="${FILM.poster}" aria-label="玛甘比学院宣传影像：歌风之城的来信"><source src="${FILM.src}" type="video/webm">当前浏览器无法播放此影像。</video></div><p class="film-caption"><span>玛甘比学院 · 歌风之城的来信</span><small>团务宣传影像 · 约一分钟</small></p>`,
+      (dialog) => {
+        const video = $("video", dialog);
+        filmOpen = true;
+        dialog.classList.add("film-dialog");
+        // The film carries its own score, so the courtyard music rests while it plays.
+        video.addEventListener("play", () => audio.pause());
+        video.addEventListener("error", () => toast("影像暂时无法播放，请稍后重试。"), true);
+        dialog.addEventListener(
+          "close",
+          () => {
+            filmOpen = false;
+            video.pause();
+            dialog.classList.remove("film-dialog");
+            audio.resume();
+          },
+          { once: true },
+        );
+      },
+    );
   }
   function showBranches() {
     openDialog(
@@ -939,6 +974,7 @@ function startAdmissions() {
     document.removeEventListener("keydown", activateAudio, true);
     try {
       await audio.enable();
+      if (filmOpen) audio.pause();
       syncSoundControl();
     } catch {}
   };
@@ -965,7 +1001,7 @@ function startAdmissions() {
     { passive: true },
   );
   document.addEventListener("visibilitychange", () =>
-    document.hidden ? audio.pause() : audio.resume(),
+    document.hidden ? audio.pause() : filmOpen || audio.resume(),
   );
   window.addEventListener("pagehide", () => {
     document.removeEventListener("pointerdown", activateAudio, true);
