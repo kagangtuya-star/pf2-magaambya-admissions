@@ -10,6 +10,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { normalizeWebM, requireFFmpeg } from "./normalize.mjs";
 
 const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const args = Object.fromEntries(
@@ -19,6 +20,7 @@ const args = Object.fromEntries(
   }),
 );
 const outDir = path.resolve(args.out || path.join(root, "web/media/promo"));
+if (!args.stills && !args.audio) requireFFmpeg();
 const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
 
 function findChrome() {
@@ -111,6 +113,10 @@ console.log(`Rendering via ${url}`);
 const timeout = setTimeout(() => finish.reject(new Error("渲染超时")), 45 * 60 * 1000);
 try {
   await finished;
+  if (!args.stills && !args.audio) {
+    console.log("Converting WebM to limited-range BT.709 for hardware decoding…");
+    await normalizeWebM(path.join(outDir, "magaambya-promo.webm"));
+  }
   console.log("Done.");
 } catch (error) {
   console.error(error.message);
