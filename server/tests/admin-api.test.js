@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createServer } from '../app.js';
-import { SETTINGS_PATH, SUBMISSIONS_PATH } from '../constants.js';
+import { EXAM_CONTENT_PATH, SETTINGS_PATH, SUBMISSIONS_PATH } from '../constants.js';
 
 async function startTestServer() {
   const server = createServer();
@@ -28,6 +28,7 @@ async function createAdminToken(baseUrl) {
 }
 
 async function seedSubmission(baseUrl) {
+  const content = JSON.parse(await readFile(EXAM_CONTENT_PATH, 'utf8'));
   const unlock = await fetch(`${baseUrl}/api/public/unlock`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -43,8 +44,8 @@ async function seedSubmission(baseUrl) {
     },
     body: JSON.stringify({
       player_name: 'Applicant',
-      riddle_answers: { q1: 'B', q2: 'C', q3: 'A' },
-      exam_answers: { e1: '答案一', e2: '答案二', e3: '答案三' },
+      riddle_answers: Object.fromEntries(content.page1_riddles.map(q => [q.id, q.correct_key])),
+      exam_answers: Object.fromEntries(content.page2_exam.flatMap(g => g.questions).map(q => [q.id, `答案：${q.id}`])),
     }),
   });
 
@@ -82,6 +83,7 @@ test('GET /api/admin/settings returns public configuration fields', async () => 
 });
 
 test('GET /api/admin/exam-content returns full content including correct_key', async () => {
+  const content = JSON.parse(await readFile(EXAM_CONTENT_PATH, 'utf8'));
   const { server, baseUrl } = await startTestServer();
   const adminToken = await createAdminToken(baseUrl);
   const response = await fetch(`${baseUrl}/api/admin/exam-content`, {
@@ -92,7 +94,7 @@ test('GET /api/admin/exam-content returns full content including correct_key', a
   server.close();
 
   assert.equal(response.status, 200);
-  assert.equal(body.data.page1_riddles[0].correct_key, 'B');
+  assert.deepEqual(body.data, content);
 });
 
 test('PUT /api/admin/settings updates settings', async () => {

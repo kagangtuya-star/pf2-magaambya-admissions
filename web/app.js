@@ -400,7 +400,7 @@ function startAdmissions() {
     const leftContent = isStart
       ? `<p class="material-lead">从此以后，<br>你也是这段传承的一部分。</p><p>旅途带你来到这里。接下来的书页，为你留白。</p><img class="botanical-plate" src="/assets/botanical.svg" alt="">`
       : isRiddles
-        ? `<p class="material-lead">知识让我们相遇，<br>也让我们彼此照亮。</p><p>这些问题关于玛甘比的传统与精神。选择之后，你仍然可以返回修改。</p><div class="scholarship-note">${icon("book", 28)}<span>三道小问<br><small>PRELIMINARY QUESTIONS</small></span></div>`
+        ? `<p class="material-lead">知识让我们相遇，<br>也让我们彼此照亮。</p><p>这些问题关于玛甘比的传统与精神。选择之后，你仍然可以返回修改。</p><div class="scholarship-note">${icon("book", 28)}<span>${content.page1_riddles.length} 道小问<br><small>PRELIMINARY QUESTIONS</small></span></div>`
         : `<span class="material-label">阅读材料 ${String(page - 1).padStart(2, "0")}</span><blockquote>${esc(g.reading_material).replaceAll("\n", "<br>")}</blockquote><div class="source-rule"></div><p class="material-instruction">读完材料后，在右页写下你的想法。</p>`;
     const rightContent = isStart
       ? `<div class="identity-field"><label class="field-label" for="player-name">在此署名</label><input id="player-name" maxlength="80" autocomplete="name" value="${esc(draft.name)}" placeholder="你希望我们如何称呼你" required><span class="identity-underline"></span><p>使用角色名，或与主持人约定的称呼。</p></div><div class="writing-promise"><span class="small-crest">${icon("leaf", 28)}</span><p>这里没有预先写好的故事。<br>请将真实的你，带到书页之间。</p></div><p class="privacy-note">草稿保存在本机。提交后，来信将由主持人阅览。</p>`
