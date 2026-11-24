@@ -403,7 +403,7 @@ function startAdmissions() {
         ? `<p class="material-lead">知识让我们相遇，<br>也让我们彼此照亮。</p><p>这些问题关于玛甘比的传统与精神。选择之后，你仍然可以返回修改。</p><div class="scholarship-note">${icon("book", 28)}<span>${content.page1_riddles.length} 道小问<br><small>PRELIMINARY QUESTIONS</small></span></div>`
         : `<span class="material-label">阅读材料 ${String(page - 1).padStart(2, "0")}</span><blockquote>${esc(g.reading_material).replaceAll("\n", "<br>")}</blockquote><div class="source-rule"></div><p class="material-instruction">读完材料后，在右页写下你的想法。</p>`;
     const rightContent = isStart
-      ? `<div class="identity-field"><label class="field-label" for="player-name">在此署名</label><input id="player-name" maxlength="80" autocomplete="name" value="${esc(draft.name)}" placeholder="你希望我们如何称呼你" required><span class="identity-underline"></span><p>使用角色名，或与主持人约定的称呼。</p></div><div class="writing-promise"><span class="small-crest">${icon("leaf", 28)}</span><p>这里没有预先写好的故事。<br>请将真实的你，带到书页之间。</p></div><p class="privacy-note">草稿保存在本机。提交后，来信将由主持人阅览。</p>`
+      ? `<div class="identity-field"><label class="field-label" for="player-name">在此署名</label><input id="player-name" maxlength="80" autocomplete="name" value="${esc(draft.name)}" placeholder="你希望我们如何称呼你" required><span class="identity-underline"></span><p>使用角色名，或与主持人约定的称呼。</p></div><div class="identity-field contact-field"><label class="field-label" for="player-contact">联系方式</label><input id="player-contact" type="text" maxlength="200" value="${esc(draft.contact)}" placeholder="QQ、微信或邮箱，请注明联系方式类型" required aria-describedby="contact-help"><span class="identity-underline"></span><p id="contact-help">请留下主持人能够联系到你的方式。</p></div><div class="writing-promise"><span class="small-crest">${icon("leaf", 28)}</span><p>这里没有预先写好的故事。<br>请将真实的你，带到书页之间。</p></div><p class="privacy-note">草稿保存在本机。提交后，来信将由主持人阅览。</p>`
       : isRiddles
         ? content.page1_riddles
             .map(
@@ -426,7 +426,7 @@ function startAdmissions() {
           `<div class="review-answer"><h3>${esc(q.question)}</h3><p>${esc(q.options.find((o) => o.key === draft.riddles[q.id])?.text || "未作答")}</p></div>`,
       )
       .join("");
-    return `<main id="main" class="review-screen"><article class="review-paper"><header class="review-title"><p class="eyebrow">BEFORE YOU SEND</p><h1 tabindex="-1">让我们再读一遍。</h1><p>封好来信之前，请核对署名与每一页回答。</p></header><div class="review-name"><small>来信人</small><strong>${esc(draft.name)}</strong><button class="understated" type="button" data-edit="0">修改署名</button></div><details class="review-objective"><summary>学前问答 <span>${content.page1_riddles.length} 题</span></summary>${rows}<button class="understated" type="button" data-edit="1">返回修改</button></details>${content.page2_exam.map((g, i) => `<section class="review-section"><div class="review-section-title"><h2>${esc(pageList()[i + 2])}</h2><button class="understated" type="button" data-edit="${i + 2}">返回修改</button></div>${g.questions.map((q) => `<div class="review-answer"><h3>${esc(q.question)}</h3><p class="preserve-lines">${esc(draft.answers[q.id] || "未作答")}</p></div>`).join("")}</section>`).join("")}<div class="submission-area"><label class="consent"><input id="consent" type="checkbox"><span>我已核对来信，愿将以上内容交予主持人阅览。</span></label><p class="form-error" id="submit-error" role="alert"></p><div class="submission-actions"><button class="back-link" type="button" data-action="edit-last">${icon("back", 17)} 继续修改</button><button class="primary" type="button" data-action="submit" ${busy ? "disabled" : ""}>${busy ? "正在寄出" : "封存并寄出"}<span>${icon("arrow")}</span></button></div></div></article></main>`;
+    return `<main id="main" class="review-screen"><article class="review-paper"><header class="review-title"><p class="eyebrow">BEFORE YOU SEND</p><h1 tabindex="-1">让我们再读一遍。</h1><p>封好来信之前，请核对署名、联系方式与每一页回答。</p></header><div class="review-name"><small>来信人</small><strong>${esc(draft.name)}</strong><button class="understated" type="button" data-edit="0">修改署名</button></div><div class="review-name review-contact"><small>联系方式</small><strong>${esc(draft.contact)}</strong><button class="understated" type="button" data-edit="0">修改联系方式</button></div><details class="review-objective"><summary>学前问答 <span>${content.page1_riddles.length} 题</span></summary>${rows}<button class="understated" type="button" data-edit="1">返回修改</button></details>${content.page2_exam.map((g, i) => `<section class="review-section"><div class="review-section-title"><h2>${esc(pageList()[i + 2])}</h2><button class="understated" type="button" data-edit="${i + 2}">返回修改</button></div>${g.questions.map((q) => `<div class="review-answer"><h3>${esc(q.question)}</h3><p class="preserve-lines">${esc(draft.answers[q.id] || "未作答")}</p></div>`).join("")}</section>`).join("")}<div class="submission-area"><label class="consent"><input id="consent" type="checkbox"><span>我已核对来信，愿将以上内容交予主持人阅览。</span></label><p class="form-error" id="submit-error" role="alert"></p><div class="submission-actions"><button class="back-link" type="button" data-action="edit-last">${icon("back", 17)} 继续修改</button><button class="primary" type="button" data-action="submit" ${busy ? "disabled" : ""}>${busy ? "正在寄出" : "封存并寄出"}<span>${icon("arrow")}</span></button></div></div></article></main>`;
   }
   async function go(phase, instant = false) {
     machine.go(phase);
@@ -464,6 +464,10 @@ function startAdmissions() {
     $("#unlock-form")?.addEventListener("submit", unlock);
     $("#player-name")?.addEventListener("input", (e) => {
       draft.name = e.target.value;
+      save();
+    });
+    $("#player-contact")?.addEventListener("input", (e) => {
+      draft.contact = e.target.value;
       save();
     });
     $$(".riddle input").forEach(
@@ -686,6 +690,7 @@ function startAdmissions() {
         token,
         body: {
           player_name: draft.name.trim(),
+          player_contact: draft.contact.trim(),
           riddle_answers: draft.riddles,
           exam_answers: draft.answers,
         },

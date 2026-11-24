@@ -168,6 +168,10 @@ body.landing-intro-active .world-shade{background:linear-gradient(90deg,rgba(9,2
 @keyframes check-draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
 .essay textarea:focus{box-shadow:0 0 0 3px rgba(127,157,99,.1),0 10px 30px -18px rgba(70,110,80,.55)}
 .identity-field{position:relative}
+.identity-field+.identity-field{margin-top:30px}
+.contact-field input{font-family:var(--sans);font-size:16px}
+.review-contact strong{font-family:var(--sans);font-size:14px;min-width:0;overflow-wrap:anywhere}
+.review-contact small,.review-contact button{flex-shrink:0}
 .identity-underline{display:block;height:1px;margin-top:-1px;background:linear-gradient(90deg,#7c6a3a,var(--gild),transparent);transform:scaleX(0);transform-origin:left;transition:transform .8s var(--ease-out)}
 .identity-field:focus-within .identity-underline{transform:scaleX(1)}
 

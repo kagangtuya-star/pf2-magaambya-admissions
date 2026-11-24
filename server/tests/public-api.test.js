@@ -99,6 +99,7 @@ test('POST /api/public/submissions persists a submission', async () => {
     },
     body: JSON.stringify({
       player_name: 'Applicant',
+      player_contact: '  QQ：123456789  ',
       riddle_answers: riddleAnswers,
       exam_answers: examAnswers,
     }),
@@ -112,7 +113,9 @@ test('POST /api/public/submissions persists a submission', async () => {
   assert.equal(response.status, 201);
   assert.equal(body.success, true);
   assert.equal(saved.items.length > 0, true);
+  assert.equal(body.data.player_contact, 'QQ：123456789');
   const submission = saved.items.find(item => item.id === body.data.submission_id);
+  assert.equal(submission.player_contact, 'QQ：123456789');
   assert.deepEqual(submission.riddle_answers, riddleAnswers);
   assert.deepEqual(submission.exam_answers, examAnswers);
   assert.deepEqual(submission.content_snapshot, content.page2_exam);
@@ -120,4 +123,28 @@ test('POST /api/public/submissions persists a submission', async () => {
     objective_total: content.page1_riddles.length,
     objective_correct: content.page1_riddles.length,
   });
+});
+
+test('POST /api/public/submissions rejects missing, malformed and oversized contact details', async (t) => {
+  const original = await readFile(SUBMISSIONS_PATH, 'utf8');
+  const content = JSON.parse(await readFile(EXAM_CONTENT_PATH, 'utf8'));
+  const { server, baseUrl } = await startTestServer();
+  t.after(() => server.close());
+  const attemptToken = await createAttemptToken(baseUrl);
+  const submission = {
+    player_name: 'Applicant',
+    riddle_answers: Object.fromEntries(content.page1_riddles.map(q => [q.id, q.correct_key])),
+    exam_answers: Object.fromEntries(content.page2_exam.flatMap(g => g.questions).map(q => [q.id, 'Answer'])),
+  };
+  for (const contact of [undefined, null, '', ' \n ', 12345, [], {}, 'x'.repeat(201)]) {
+    const response = await fetch(`${baseUrl}/api/public/submissions`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${attemptToken}` },
+      body: JSON.stringify({ ...submission, player_contact: contact }),
+    });
+    const body = await response.json();
+    assert.equal(response.status, 400);
+    assert.equal(body.error.code, 'INVALID_CONTACT');
+  }
+  assert.equal(await readFile(SUBMISSIONS_PATH, 'utf8'), original);
 });

@@ -118,6 +118,10 @@ export async function submitSubmission(request, response) {
     });
   }
 
+  if (!isNonEmptyString(body.player_contact) || body.player_contact.trim().length > 200) {
+    return sendJson(response, 400, {success:false,error:{code:'INVALID_CONTACT',message:'请填写联系方式，且不超过 200 字。'}});
+  }
+
   const content = await getExamContent();
   if(stale(request,response,content))return;
   const riddles = body.riddle_answers && typeof body.riddle_answers === 'object' && !Array.isArray(body.riddle_answers) ? body.riddle_answers : {};
@@ -136,6 +140,7 @@ export async function submitSubmission(request, response) {
   const scoreSnapshot = {objective_total:content.page1_riddles.length,objective_correct:content.page1_riddles.length};
   const saved = await createSubmission({
     player_name: body.player_name.trim(),
+    player_contact: body.player_contact.trim(),
     attempt_id: request.auth.attempt_id,
     spell_verified: true,
     riddle_answers: Object.fromEntries(content.page1_riddles.map(q => [q.id,riddles[q.id]])),
@@ -152,6 +157,7 @@ export async function submitSubmission(request, response) {
       status: saved.status,
       created_at: saved.created_at,
       player_name: saved.player_name,
+      player_contact: saved.player_contact,
       exam_answers: saved.exam_answers,
     },
     message: '注入魔力成功，答案已被记录',

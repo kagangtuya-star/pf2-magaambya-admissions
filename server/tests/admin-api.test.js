@@ -44,6 +44,7 @@ async function seedSubmission(baseUrl) {
     },
     body: JSON.stringify({
       player_name: 'Applicant',
+      player_contact: '微信：raincourt-test',
       riddle_answers: Object.fromEntries(content.page1_riddles.map(q => [q.id, q.correct_key])),
       exam_answers: Object.fromEntries(content.page2_exam.flatMap(g => g.questions).map(q => [q.id, `答案：${q.id}`])),
     }),
@@ -147,6 +148,7 @@ test('GET /api/admin/submissions and GET /api/admin/submissions/:id expose saved
   assert.equal(listBody.data.items.length > 0, true);
   assert.equal(detailResponse.status, 200);
   assert.equal(detailBody.data.id, created.data.submission_id);
+  assert.equal(detailBody.data.player_contact, '微信：raincourt-test');
 });
 
 test('PATCH /api/admin/submissions/:id and GET /api/admin/stats work', async () => {
